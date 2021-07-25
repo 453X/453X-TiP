@@ -6,9 +6,7 @@
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-void initialize() {
-
-}
+void initialize(){}
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -54,30 +52,16 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
+void opcontrol()
+{
+    while (true)
+    {
+        // Arcade drive with the left stick.
+        drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
+                                  controller.getAnalog(ControllerAnalog::rightX));
 
-	// Chassis Controller - lets us drive the robot around with open- or closed-loop control
-std::shared_ptr<ChassisController> drive =
-    ChassisControllerBuilder()
-        .withMotors(
-        {-1, -2}, // Left motors are 1 & 2 (reversed)
-        {3, 4})
-        // Green gearset, 4 in wheel diam, 11.5 in wheel track
-        .withDimensions(AbstractMotor::gearset::blue, {{4_in, 11.5_in}, imev5BlueTPR})
-        .build();
-
-		// Joystick to read analog values for tank or arcade control.
-// Master controller by default.
-Controller controller;
-
-while (true) {
-    // Arcade drive with the left stick.
-    drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
-                              controller.getAnalog(ControllerAnalog::rightX));
-
-    // Wait and give up the time we don't need to other tasks.
-    // Additionally, joystick values, motor telemetry, etc. all updates every 10 ms.
-    pros::delay(10);
-}
-	
+        // Wait and give up the time we don't need to other tasks.
+        // Additionally, joystick values, motor telemetry, etc. all updates every 10 ms.
+        pros::delay(10);
+    }
 }
