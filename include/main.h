@@ -77,7 +77,9 @@ void opcontrol(void);
  */
 //#include <iostream>
 
-#include "subsystems/motors.hpp" 
+#include "subsystems/drive.hpp" 
+#include "subsystems/mogoLift.hpp"
+#include "subsystems/globals.hpp"
 
 #endif
 
