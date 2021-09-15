@@ -77,9 +77,12 @@ void opcontrol(void);
  */
 //#include <iostream>
 
+// #include "subsystems/globals.hpp"
 #include "subsystems/drive.hpp" 
 #include "subsystems/mogoLift.hpp"
-#include "subsystems/globals.hpp"
+#include "subsystems/parallelLift.hpp"
+#include "subsystems/rollers.hpp"
+
 
 #endif
 

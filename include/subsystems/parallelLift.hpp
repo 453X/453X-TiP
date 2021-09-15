@@ -1,6 +1,6 @@
 #include "main.h"
 
-namespace mogoLift
+namespace parallel
 {
     void init();
     void opcontrol();

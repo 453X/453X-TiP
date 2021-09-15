@@ -1,6 +1,6 @@
 #include "main.h"
 
-namespace mogoLift
+namespace rollers
 {
     void init();
     void opcontrol();

@@ -1,7 +1,7 @@
 #include "main.h"
 
-namespace drive{
-
+namespace drive
+{
+    void init();
     void opcontrol();
-
 }
