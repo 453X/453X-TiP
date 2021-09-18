@@ -10,7 +10,7 @@ void initialize()
 {
     drive::init();
     mogoLift::init();
-    parallel::init();
+    parallelLift::init();
     rollers::init();
 }
 
@@ -62,14 +62,14 @@ void opcontrol()
 {
     drive::init();
     mogoLift::init();
-    parallel::init();
+    parallelLift::init();
     rollers::init();
 
     while (true)
     {
         drive::opcontrol();
         mogoLift::opcontrol();
-        parallel::opcontrol();
+        parallelLift::opcontrol();
         rollers::opcontrol();
 
         

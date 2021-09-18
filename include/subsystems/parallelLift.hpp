@@ -1,6 +1,6 @@
 #include "main.h"
 
-namespace parallel
+namespace parallelLift
 {
     void init();
     void opcontrol();

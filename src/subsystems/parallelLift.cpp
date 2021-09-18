@@ -1,9 +1,9 @@
 #include "main.h"
     
 
-namespace parallel{
+namespace parallelLift{
 
-    Motor lift(6);
+    Motor lift(7);
 
     void init()
     {
@@ -13,8 +13,8 @@ namespace parallel{
     void opcontrol()
     {
         Controller master;
-        ControllerButton up(ControllerDigital::R1);
-        ControllerButton down(ControllerDigital::R2);
+        ControllerButton up(ControllerDigital::up);
+        ControllerButton down(ControllerDigital::down);
 
 
             if (up.isPressed())
