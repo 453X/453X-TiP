@@ -14,16 +14,12 @@ namespace mogoLift
     void opcontrol()
     {
         Controller master;
-        ControllerButton R1(ControllerDigital::R1);
         ControllerButton R2(ControllerDigital::R2);
+        ControllerButton shift(ControllerDigital::L2);
 
-        if (R2.isPressed())
+        if (shift.isPressed())
         {
-            lift.moveVoltage(12000);
-        }
-        else if (R1.isPressed())
-        {
-            if (!limit.isPressed())
+            if (R2.isPressed())
             {
                 lift.moveVoltage(-12000);
             }
@@ -34,7 +30,14 @@ namespace mogoLift
         }
         else
         {
-            lift.moveVelocity(0);
+            if (R2.isPressed())
+            {
+                lift.moveVoltage(12000);
+            }
+            else
+            {
+                lift.moveVelocity(0);
+            }
         }
     }
 }
