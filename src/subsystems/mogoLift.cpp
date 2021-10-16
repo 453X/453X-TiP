@@ -19,7 +19,7 @@ namespace mogoLift
 
         if (shift.isPressed())
         {
-            if (R2.isPressed())
+            if (R2.isPressed() && !limit.isPressed())
             {
                 lift.moveVoltage(-12000);
             }
@@ -28,6 +28,7 @@ namespace mogoLift
                 lift.moveVelocity(0);
             }
         }
+
         else
         {
             if (R2.isPressed())

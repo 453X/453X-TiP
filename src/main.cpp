@@ -12,6 +12,8 @@ void initialize()
     mogoLift::init();
     parallelLift::init();
     rollers::init();
+
+    pid::inertialReset();
 }
 
 /**
