@@ -198,17 +198,17 @@ namespace pid
             if (inertial.get_rotation() > rotation + tolerance)
             {
                 left.moveVelocity(power - tune);
-                right.moveVelocity(power - tune);
+                right.moveVelocity(power + tune);
             }
             else if (inertial.get_rotation() < rotation - tolerance)
             {
                 left.moveVelocity(power + tune);
-                right.moveVelocity(power + tune);
+                right.moveVelocity(power - tune);
             }
             else
             {
-                left.moveVelocity(power - tune);
-                right.moveVelocity(power - tune);
+                left.moveVelocity(power);
+                right.moveVelocity(power);
             }
 
             pros::delay(10);
