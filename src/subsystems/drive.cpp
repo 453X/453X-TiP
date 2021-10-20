@@ -11,7 +11,7 @@ MotorGroup right({RF, RB});
 ADIEncoder middleEncoder('A', 'B');
 ADIEncoder leftEncoder('C', 'D', true);
 ADIEncoder rightEncoder('E', 'F', false);
-IMU inertial(11);       
+IMU inertial(11);
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
@@ -135,6 +135,18 @@ namespace pid
         return (fabs(leftEncoder.get()) + fabs(rightEncoder.get())) / 2;
     }
 
+    void turn(double power)
+    {
+        left.moveVelocity(power);
+        right.moveVelocity(-power);
+    }
+
+    void move(int power)
+    {
+        left.moveVelocity(power);
+        right.moveVelocity(power);
+    }
+
     void forwardPD(int units)
     { // power in positive, units in positive or negative
         resetDriveEncoders();
@@ -186,4 +198,100 @@ namespace pid
         }
         stop(0);
     }
+
+    void rotateDegreesPD(double deg)
+    {
+        double tolerance = 4;
+        double bias = 0;
+
+        double error = 0;
+        double derivative;
+        double prevError = 0;
+
+        double kP = 3.2;
+        double kD = 2;
+
+        while (true)
+        {
+            double heading = inertial.get();
+
+            error = heading - deg;
+
+            if (heading < -360 || heading > 360)
+            {
+                continue;
+            }
+            bool turnRight = false;
+            double error = heading - deg;
+            // double error = 60;
+            if (error > 0)
+            {
+                if (error > 180)
+                {
+                    // right
+                    error = 360 - error;
+                    turnRight = true;
+                }
+                else
+                {
+                    // left
+                    turnRight = false;
+                }
+            }
+            else
+            {
+                if (error < -180)
+                {
+                    // left
+                    error = 360 + error;
+                    turnRight = false;
+                }
+                else
+                {
+                    // right
+                    error = error * -1;
+                    turnRight = true;
+                }
+            }
+
+            // error += bias;
+            if (turnRight)
+                pros::lcd::print(3, "error  >> %5.2f   RIGHT", error);
+            else
+                pros::lcd::print(3, "error  >> %5.2f   LEFT", error);
+
+            pros::lcd::print(4, "tole  >> %5.2f", tolerance);
+
+            if (error > tolerance)
+            {
+                double pow = 0;
+                if (turnRight == false)
+                {
+                    // turn A(error) Left
+                    pow = -error * kP - derivative * kD;
+                    // pow = -20 + error / -2;
+                }
+                else
+                {
+                    // turn B(error) right
+                    // pow = 20 + error / 2;
+                    pow = error * kP + derivative * kD;
+                }
+                turn(pow);
+                pros::lcd::print(2, "TURN  >> %5.2f", pow);
+            }
+            else
+            {
+                turn(0);
+                break;
+            }
+            derivative = error - prevError;
+            prevError = error;
+            pros::delay(15);
+            pros::lcd::print(0, "heading  >> %5.2f", heading);
+            pros::lcd::print(1, "target   >> %5.2f", deg);
+            move(0);
+        }
+    }
+    
 }
