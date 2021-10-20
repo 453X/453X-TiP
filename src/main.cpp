@@ -14,6 +14,7 @@ void initialize()
     rollers::init();
 
     pid::inertialReset();
+
 }
 
 /**
@@ -68,6 +69,8 @@ void opcontrol()
     mogoLift::init();
     parallelLift::init();
     rollers::init();
+
+    
 
     while (true)
     {

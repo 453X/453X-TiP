@@ -11,7 +11,7 @@ MotorGroup right({RF, RB});
 ADIEncoder middleEncoder('A', 'B');
 ADIEncoder leftEncoder('C', 'D', true);
 ADIEncoder rightEncoder('E', 'F', false);
-pros::Imu inertial(11);
+IMU inertial(11);       
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
@@ -68,42 +68,13 @@ namespace auton
 {
     void redLeft()
     {
-        // leftEncoder.reset();
-        // rightEncoder.reset();
-        // middleEncoder.reset();
-
-        // driveOdom->setState({0_in, 0_in, 0_deg});
-        // claw.moveVoltage(-12000);
-        // driveOdom->moveDistance(4_ft);
-        // claw.moveVoltage(12000);
-        // lift.moveRelative(100, 100);
-        // pros::delay(1000);
-        // driveOdom->moveDistance(-3_ft);
-        // claw.moveVelocity(0);
-
-        // driveOdom->turnToAngle(90_deg);
-        // driveOdom->waitUntilSettled();
-        // driveOdom->stop();
-        // pros::delay(1000);
-        // driveOdom->turnToAngle(180_deg);
-        // driveOdom->waitUntilSettled();
-        // driveOdom->stop();
-        // pros::delay(1000);
-        // driveOdom->turnToAngle(270_deg);
-        // driveOdom->waitUntilSettled();
-        // driveOdom->stop();
-        // pros::delay(1000);
-
-        // driveOdom->driveToPoint({600_cm, 0_cm});
-        // driveOdom->driveToPoint({0_cm, 600_cm});
-
         pid::resetDriveEncoders();
-        // pid::calibrate();
-        // inertial.reset();
 
         claw.moveVoltage(-12000);
         pid::forwardPD(1980);
         claw.moveVoltage(12000);
+        lift.moveRelative(900, 127);
+        pid::delaySeconds(0.3);
         pid::forwardPD(-1000);
         pid::stop();
     }
@@ -123,7 +94,7 @@ namespace pid
         int err = inertial.reset();
         pros::lcd::print(0, "calibrate : reset (done)  %d", err);
         int n = 0;
-        while (inertial.is_calibrating())
+        while (inertial.isCalibrating())
         {
             pros::lcd::print(0, "calibrate : is_calibrating : %d", n++);
 
@@ -168,7 +139,7 @@ namespace pid
     { // power in positive, units in positive or negative
         resetDriveEncoders();
         int direction = abs(units) / units;
-        double rotation = inertial.get_rotation();
+        double rotation = inertial.get();
         int power = 0;
         int setPoint = abs(units);
 
@@ -188,19 +159,19 @@ namespace pid
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
             // fabs(driveLF.get_position()));
-            pros::lcd::print(0, "rotation  >> %5.2f", inertial.get_rotation());
+            pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
             pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
             pros::lcd::print(2, "error   >> %5.2f", error);
 
             derivative = error - prevError;
             prevError = error;
 
-            if (inertial.get_rotation() > rotation + tolerance)
+            if (inertial.get() > rotation + tolerance)
             {
                 left.moveVelocity(power - tune);
                 right.moveVelocity(power + tune);
             }
-            else if (inertial.get_rotation() < rotation - tolerance)
+            else if (inertial.get() < rotation - tolerance)
             {
                 left.moveVelocity(power + tune);
                 right.moveVelocity(power - tune);

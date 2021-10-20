@@ -4,7 +4,8 @@ namespace mogoLift
 {
 
     Motor lift(5);
-    ADIButton limit('G');
+    ADIButton frontLimit('G');
+    ADIButton backLimit('H');
 
     void init()
     {
@@ -19,7 +20,7 @@ namespace mogoLift
 
         if (shift.isPressed())
         {
-            if (R2.isPressed() && !limit.isPressed())
+            if (R2.isPressed() && !backLimit.isPressed())
             {
                 lift.moveVoltage(-12000);
             }
@@ -31,7 +32,7 @@ namespace mogoLift
 
         else
         {
-            if (R2.isPressed())
+            if (R2.isPressed() && !frontLimit.isPressed())
             {
                 lift.moveVoltage(12000);
             }
