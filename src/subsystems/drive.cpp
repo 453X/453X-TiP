@@ -62,6 +62,18 @@ namespace drive
                                       master.getAnalog(ControllerAnalog::leftX));
     }
 
+    void turn(double power)
+    {
+        left.moveVelocity(power);
+        right.moveVelocity(-power);
+    }
+
+    void move(int power)
+    {
+        left.moveVelocity(power);
+        right.moveVelocity(power);
+    }
+
 }
 
 namespace auton
@@ -71,11 +83,11 @@ namespace auton
         pid::resetDriveEncoders();
 
         claw.moveVoltage(-12000);
-        pid::forwardPD(1980);
+        pid::drive(1980);
         claw.moveVoltage(12000);
         lift.moveRelative(900, 127);
         pid::delaySeconds(0.3);
-        pid::forwardPD(-1000);
+        pid::drive(-1000);
         pid::stop();
     }
 
@@ -135,19 +147,9 @@ namespace pid
         return (fabs(leftEncoder.get()) + fabs(rightEncoder.get())) / 2;
     }
 
-    void turn(double power)
-    {
-        left.moveVelocity(power);
-        right.moveVelocity(-power);
-    }
+    
 
-    void move(int power)
-    {
-        left.moveVelocity(power);
-        right.moveVelocity(power);
-    }
-
-    void forwardPD(int units)
+    void drive(int units)
     { // power in positive, units in positive or negative
         resetDriveEncoders();
         int direction = abs(units) / units;
