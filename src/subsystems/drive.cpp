@@ -68,15 +68,34 @@ namespace auton
 {
     void redLeft()
     {
+        // debug
+        pros::lcd::initialize();
+
+
         pid::resetDriveEncoders();
 
-        claw.moveVoltage(-12000);
+        // open
+        clawOpen(true);
         pid::forwardPD(1980);
-        claw.moveVoltage(12000);
+        clawOpen(false);
+        pid::delaySeconds(0.3);
         lift.moveRelative(900, 127);
         pid::delaySeconds(0.3);
         pid::forwardPD(-1000);
-        pid::stop();
+        pid::rotateDegreesPD(-100);
+        // pid::stop();
+    }
+
+    void clawOpen(bool open) {
+        if (open) {
+            int err = claw.moveVoltage(-8000);
+            pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
+        }
+        else {
+            int err = claw.moveVoltage(8000);
+            pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
+        }
+
     }
 
 }

@@ -9,6 +9,7 @@ namespace drive
 namespace auton
 {
     void redLeft();
+    void clawOpen(bool b);
 }
 
 namespace pid
