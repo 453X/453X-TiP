@@ -49,6 +49,9 @@ namespace drive
         RF.setBrakeMode(AbstractMotor::brakeMode::coast);
         RB.setBrakeMode(AbstractMotor::brakeMode::coast);
 
+        claw.setBrakeMode(AbstractMotor::brakeMode::hold);
+        claw.tarePosition();
+        claw.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
         pid::resetDriveEncoders();
     }
 
@@ -78,7 +81,7 @@ namespace drive
 
 namespace auton
 {
-    void redLeft()
+    void redRight()
     {
         // debug
         pros::lcd::initialize();
@@ -92,14 +95,17 @@ namespace auton
         clawOpen(false);
         pid::delaySeconds(0.1);
 
+        // lift
         lift.moveRelative(900, 127);
         pid::delaySeconds(0.3);
 
+        // back
         pid::forwardPD(-1000);
 
-        // 
+        // release tower
+        pid::rotateDegreesPD(-90);
         lift.moveRelative(-900, 127);
-        clawOpen(true);
+        clawOpen(true );
 
         pid::delaySeconds(0.3);
 
@@ -108,7 +114,7 @@ namespace auton
 
     void clawOpen(bool open) {
         if (open) {
-            int err = claw.moveVoltage(-12000);
+            int err = claw.moveAbsolute(-250, 100);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else {
@@ -221,7 +227,7 @@ namespace pid
 
     
 
-    void drive(int units)
+    void forwardPD(int units)
     { // power in positive, units in positive or negative
         resetDriveEncoders();
         int direction = abs(units) / units;
@@ -229,8 +235,11 @@ namespace pid
         int power = 0;
         int setPoint = abs(units);
 
-        double kP = 0.5;
+        double kP = 0.6;
         double kD = 0.2;
+        double kI = 0.01  ;
+
+        double errorSum = 0 ;
 
         while (avgDriveEncoders() < abs(units))
         {
@@ -238,10 +247,12 @@ namespace pid
             double tolerance = 0.3;
 
             double error = setPoint - avgDriveEncoders();
+            if( error<100)
+                errorSum += error ;
             double prevError = 0;
             double derivative;
 
-            power = direction * (error * kP + derivative * kD);
+            power = direction * (error * kP + derivative * kD + errorSum*kI);
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
             // fabs(driveLF.get_position()));
@@ -275,7 +286,7 @@ namespace pid
 
     void rotateDegreesPD(double deg)
     {
-        double tolerance = 4;
+        double tolerance = 1;
         double bias = 0;
 
         double derivative;
@@ -341,25 +352,25 @@ namespace pid
                 if (turnRight == false)
                 {
                     // turn A(error) Left
-                    turn(pow * -1);
+                    drive::turn(pow * -1);
                 }
                 else
                 {
                     // turn B(error) right
-                    turn(pow);
+                    drive::turn(pow);
                 }
                 pros::lcd::print(5, "TURN POW >> %5.2f", pow);
             }
             else
             {
-                turn(0);
+                drive::turn(0);
                 break;
             }
             derivative = error - prevError;
             prevError = error;
             pros::delay(15);
 
-            move(0);
+            drive::move(0);
         }
     }
 

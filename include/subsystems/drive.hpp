@@ -11,7 +11,7 @@ namespace drive
 
 namespace auton
 {
-    void redLeft();
+    void redRight();
     void clawOpen(bool b);
 }
 
