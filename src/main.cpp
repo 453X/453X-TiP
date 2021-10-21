@@ -70,7 +70,7 @@ void opcontrol()
     parallelLift::init();
     rollers::init();
 
-    
+
 
     while (true)
     {
@@ -79,11 +79,11 @@ void opcontrol()
         parallelLift::opcontrol();
         rollers::opcontrol();
 
-        
+
 
         // Wait and give up the time we don't need to other tasks.
         // Additionally, joystick values, motor telemetry, etc. all updates every 10 ms.
         pros::delay(10);
-        
+
     }
 }

@@ -78,21 +78,29 @@ namespace auton
         clawOpen(true);
         pid::forwardPD(1980);
         clawOpen(false);
-        pid::delaySeconds(0.3);
+        pid::delaySeconds(0.1);
+
         lift.moveRelative(900, 127);
         pid::delaySeconds(0.3);
+
         pid::forwardPD(-1000);
-        pid::rotateDegreesPD(-100);
+
+        // 
+        lift.moveRelative(-900, 127);
+        clawOpen(true);
+
+        pid::delaySeconds(0.3);
+
         // pid::stop();
     }
 
     void clawOpen(bool open) {
         if (open) {
-            int err = claw.moveVoltage(-8000);
+            int err = claw.moveVoltage(-12000);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else {
-            int err = claw.moveVoltage(8000);
+            int err = claw.moveVoltage(12000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
 
