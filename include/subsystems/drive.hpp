@@ -14,7 +14,7 @@ namespace auton
 namespace pid
 {
     void delaySeconds(double seconds);
-    
+
     void calibrate();
     void inertialReset();
 
@@ -22,14 +22,14 @@ namespace pid
     double avgDriveEncoders();
 
     void stop();
-    void stop (double seconds);
+    void stop(double seconds);
     void move(int power);
     void turn(double power);
 
-
-
-
     void forwardPD(int units);
     void rotateDegreesPD(double deg);
+
+    // test 
+    void testRotate();
 
 }
