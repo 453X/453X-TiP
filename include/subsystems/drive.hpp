@@ -12,7 +12,11 @@ namespace drive
 namespace auton
 {
     void redRight();
-    void clawOpen(bool b);
+    void claw_open(bool b);
+    void backLift_down();
+    void backLift_up();
+    void roller_on();
+    void roller_off();
 }
 
 namespace pid

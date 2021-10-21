@@ -4,6 +4,11 @@ Motor LF(-1), LB(2), RF(3), RB(-4);
 
 Motor lift(7);
 Motor claw(-8);
+Motor roller(-6);
+Motor liftBack(5);
+
+ADIButton frontLimit('G');
+ADIButton backLimit('H');
 
 MotorGroup left({ LF, LB });
 MotorGroup right({ RF, RB });
@@ -52,6 +57,11 @@ namespace drive
         claw.setBrakeMode(AbstractMotor::brakeMode::hold);
         claw.tarePosition();
         claw.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
+
+        roller.setBrakeMode(AbstractMotor::brakeMode::coast);
+
+        liftBack.setBrakeMode(AbstractMotor::brakeMode::brake);
+
         pid::resetDriveEncoders();
     }
 
@@ -86,33 +96,49 @@ namespace auton
         // debug
         pros::lcd::initialize();
 
-
         pid::resetDriveEncoders();
 
         // open
-        clawOpen(true);
+        claw_open(true);
         pid::forwardPD(1980);
-        clawOpen(false);
+        claw_open(false);
         pid::delaySeconds(0.1);
 
-        // lift
+        // lift yellow goal
         lift.moveRelative(900, 127);
         pid::delaySeconds(0.3);
 
         // back
-        pid::forwardPD(-1000);
+        pid::forwardPD(-950);
 
-        // release tower
+        // release yellow goal
         pid::rotateDegreesPD(-90);
         lift.moveRelative(-900, 127);
-        clawOpen(true );
+        claw_open(true);
+        pid::delaySeconds(0.1);
 
-        pid::delaySeconds(0.3);
+        // back and lift red goal
+        backLift_down();
+        pid::forwardPD(-350);
+        backLift_up();
+        lift.moveRelative(900, 127);
+        pid::delaySeconds(1.2);
 
-        // pid::stop();
+        //
+        pid::rotateDegreesPD(0);
+
+        // roller
+        pid::delaySeconds(3);
+        roller_on();
+        // to do : foward speed should be slower when rollering
+        // pid::forwardPD(1500);
+        pid::delaySeconds(2);
+        roller_off();
+
+        pid::stop();
     }
 
-    void clawOpen(bool open) {
+    void claw_open(bool open) {
         if (open) {
             int err = claw.moveAbsolute(-250, 100);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
@@ -124,6 +150,23 @@ namespace auton
 
     }
 
+    void backLift_down() {
+        while (!frontLimit.isPressed()) {
+            liftBack.moveVoltage(12000);
+        }
+        liftBack.moveVelocity(0);
+    }
+    void backLift_up() {
+        liftBack.moveRelative(-2500, 100);
+    }
+
+    void roller_on() {
+        roller.moveVoltage(12000);
+    }
+
+    void roller_off() {
+        roller.moveVelocity(0);
+    }
 }
 
 namespace pid
@@ -225,7 +268,7 @@ namespace pid
         return (fabs(leftEncoder.get()) + fabs(rightEncoder.get())) / 2;
     }
 
-    
+
 
     void forwardPD(int units)
     { // power in positive, units in positive or negative
@@ -237,9 +280,9 @@ namespace pid
 
         double kP = 0.6;
         double kD = 0.2;
-        double kI = 0.01  ;
+        double kI = 0.01;
 
-        double errorSum = 0 ;
+        double errorSum = 0;
 
         while (avgDriveEncoders() < abs(units))
         {
@@ -247,12 +290,12 @@ namespace pid
             double tolerance = 0.3;
 
             double error = setPoint - avgDriveEncoders();
-            if( error<100)
-                errorSum += error ;
+            if (error < 100)
+                errorSum += error;
             double prevError = 0;
             double derivative;
 
-            power = direction * (error * kP + derivative * kD + errorSum*kI);
+            power = direction * (error * kP + derivative * kD + errorSum * kI);
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
             // fabs(driveLF.get_position()));
