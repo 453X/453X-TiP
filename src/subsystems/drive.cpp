@@ -5,8 +5,8 @@ Motor LF(-1), LB(2), RF(3), RB(-4);
 Motor lift(7);
 Motor claw(-8);
 
-MotorGroup left({LF, LB});
-MotorGroup right({RF, RB});
+MotorGroup left({ LF, LB });
+MotorGroup right({ RF, RB });
 
 ADIEncoder middleEncoder('A', 'B');
 ADIEncoder leftEncoder('C', 'D', true);
@@ -15,29 +15,29 @@ IMU inertial(11);
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
-                     //  .withMotors(-1,3)
-                     .withMotors(
-                         {-1, 2}, // Left motors are 1 & 2
-                         {3, -4}) // Right motors are 3 & 4
+//  .withMotors(-1,3)
+.withMotors(
+    { -1, 2 }, // Left motors are 1 & 2
+    { 3, -4 }) // Right motors are 3 & 4
 
-                     .withGains(
-                         {0.00075, 0.00000, 0}, // Distance controller gains
-                         {0.00025, 0.00000, 0}, // Turn controller gains
-                         {0.00025, 0.00000, 0}  // Angle controller gains (helps drive straight)
-                         )
+    .withGains(
+        { 0.00075, 0.00000, 0 }, // Distance controller gains
+        { 0.00025, 0.00000, 0 }, // Turn controller gains
+        { 0.00025, 0.00000, 0 }  // Angle controller gains (helps drive straight)
+    )
 
-                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+    // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+    .withDimensions({ AbstractMotor::gearset::blue, (84.0 / 36.0) }, { {4_in, 35.4_cm}, imev5BlueTPR })
 
-                     // track        = distance between the center of the 2 tracking wheels
-                     // wheel track  = distance between the center of the 2 wheels on either side
+    // track        = distance between the center of the 2 tracking wheels
+    // wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
-                     // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-                     // specify the middle encoder distance (1 in) and diameter (2.75 in)
-                     .withOdometry({{2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR})
-                     .buildOdometry();
+    .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
+    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+    // specify the middle encoder distance (1 in) and diameter (2.75 in)
+    .withOdometry({ {2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR })
+    .buildOdometry();
 
 namespace drive
 {
@@ -59,7 +59,7 @@ namespace drive
 
         // Arcade drive with the left stick.
         driveOdom->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-                                      master.getAnalog(ControllerAnalog::leftX));
+            master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -80,21 +80,93 @@ namespace auton
 {
     void redLeft()
     {
+        // debug
+        pros::lcd::initialize();
+
+
         pid::resetDriveEncoders();
 
-        claw.moveVoltage(-12000);
-        pid::drive(1980);
-        claw.moveVoltage(12000);
+        // open
+        clawOpen(true);
+        pid::forwardPD(1980);
+        clawOpen(false);
+        pid::delaySeconds(0.1);
+
         lift.moveRelative(900, 127);
         pid::delaySeconds(0.3);
-        pid::drive(-1000);
-        pid::stop();
+
+        pid::forwardPD(-1000);
+
+        // 
+        lift.moveRelative(-900, 127);
+        clawOpen(true);
+
+        pid::delaySeconds(0.3);
+
+        // pid::stop();
+    }
+
+    void clawOpen(bool open) {
+        if (open) {
+            int err = claw.moveVoltage(-12000);
+            pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
+        }
+        else {
+            int err = claw.moveVoltage(12000);
+            pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
+        }
+
     }
 
 }
 
 namespace pid
 {
+    void testRotate() {
+        pros::lcd::initialize();
+
+        // test right / left
+
+        // for (size_t i = 0; i < 10; i++)
+        // {
+        //     rotateDegreesPD(60);
+        //     delaySeconds(5);
+        //     rotateDegreesPD(-60);
+        //     delaySeconds(5);
+        // }
+
+        for (int i = 45; i <= 180; i += 45)
+        {
+            rotateDegreesPD(i);
+            delaySeconds(5);
+            rotateDegreesPD(-1 * i);
+            delaySeconds(5);
+        }
+
+        // test right
+
+        // for (size_t i = 0; i <= 10; i++)
+        // {
+        //     rotateDegreesPD(100);
+        //     delaySeconds(3);
+        // }
+
+        // turn(50);
+        // delaySeconds(1);
+        // turn(-50);
+        // delaySeconds(1);
+
+        // turn(50);
+        // delaySeconds(1);
+        // turn(-50);
+        // delaySeconds(1);
+
+        // turn(50);
+        // delaySeconds(1);
+        // turn(-50);
+        // delaySeconds(1);
+
+    }
 
     void delaySeconds(double seconds) { pros::delay(seconds * 1000); }
 
@@ -206,7 +278,6 @@ namespace pid
         double tolerance = 4;
         double bias = 0;
 
-        double error = 0;
         double derivative;
         double prevError = 0;
 
@@ -216,43 +287,43 @@ namespace pid
         while (true)
         {
             double heading = inertial.get();
-
-            error = heading - deg;
-
             if (heading < -360 || heading > 360)
             {
                 continue;
             }
             bool turnRight = false;
-            double error = heading - deg;
-            // double error = 60;
+            double error = deg - heading;
+            pros::lcd::print(0, "heading  >> %5.2f", heading);
+            pros::lcd::print(1, "target   >> %5.2f", deg);
+            pros::lcd::print(2, "orignal error  >> %5.2f", error);
+
             if (error > 0)
             {
                 if (error > 180)
                 {
-                    // right
+                    // left
                     error = 360 - error;
-                    turnRight = true;
+                    turnRight = false;
                 }
                 else
                 {
-                    // left
-                    turnRight = false;
+                    // right
+                    turnRight = true;
                 }
             }
             else
             {
                 if (error < -180)
                 {
-                    // left
+                    // right
                     error = 360 + error;
-                    turnRight = false;
+                    turnRight = true;
                 }
                 else
                 {
-                    // right
+                    // left
                     error = error * -1;
-                    turnRight = true;
+                    turnRight = false;
                 }
             }
 
@@ -266,21 +337,18 @@ namespace pid
 
             if (error > tolerance)
             {
-                double pow = 0;
+                double pow = error * kP + derivative * kD;
                 if (turnRight == false)
                 {
                     // turn A(error) Left
-                    pow = -error * kP - derivative * kD;
-                    // pow = -20 + error / -2;
+                    turn(pow * -1);
                 }
                 else
                 {
                     // turn B(error) right
-                    // pow = 20 + error / 2;
-                    pow = error * kP + derivative * kD;
+                    turn(pow);
                 }
-                turn(pow);
-                pros::lcd::print(2, "TURN  >> %5.2f", pow);
+                pros::lcd::print(5, "TURN POW >> %5.2f", pow);
             }
             else
             {
@@ -290,10 +358,9 @@ namespace pid
             derivative = error - prevError;
             prevError = error;
             pros::delay(15);
-            pros::lcd::print(0, "heading  >> %5.2f", heading);
-            pros::lcd::print(1, "target   >> %5.2f", deg);
+
             move(0);
         }
     }
-    
+
 }
