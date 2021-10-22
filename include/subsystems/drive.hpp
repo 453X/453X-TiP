@@ -12,7 +12,7 @@ namespace drive
 namespace auton
 {
     void redRight();
-    void claw_open(bool b);
+    void clawOpen(bool b);
     void backLift_down();
     void backLift_up();
     void roller_on();
@@ -31,11 +31,13 @@ namespace pid
 
     void stop();
     void stop(double seconds);
-    void move(int power);
+    void drive(int power);
+    void drive(int degrees, int power);
     void turn(double power);
 
-    void forwardPD(int units);
-    void rotateDegreesPD(double deg);
+
+    void drivePID(int units);
+    void turnPID(double deg);
 
     // test 
     void testRotate();
