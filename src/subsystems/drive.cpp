@@ -57,6 +57,9 @@ namespace drive
 
         liftBack.setBrakeMode(AbstractMotor::brakeMode::brake);
 
+        left.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
+        right.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
+
         pid::resetDriveEncoders();
     }
 
@@ -107,10 +110,10 @@ namespace auton
 
         // open
         claw_open(true);
-        pid::drivePID(1980);
+        pid::drivePID(1990);
         claw_open(false);
 
-        pid::delaySeconds(10);
+        //pid::delaySeconds(10);
         pid::delaySeconds(0.1);
 
         // lift yellow goal
@@ -119,33 +122,41 @@ namespace auton
 
         // back
         pid::drivePID(-950);
+        pid::delaySeconds(0.3);
 
         // release yellow goal
         pid::turnPID(-90);
+        //pid::delaySeconds(5);
         lift.moveRelative(-900, 127);
         claw_open(true);
         pid::delaySeconds(0.1);
 
         // back and lift red goal
         backLift_down();
-        pid::drivePID(-350);
+        pid::drivePID(-400);
+        //pid::delaySeconds(5);
         backLift_up();
         lift.moveRelative(900, 127);
-        pid::delaySeconds(1.2);
-
+        //pid::delaySeconds(1.2);
+        pid::drivePID(100);
         //
         pid::turnPID(0);
-
+        //pid::drivePID(350);
+        pid::stop();
         // roller
-        pid::delaySeconds(3);
+        //pid::delaySeconds(3);
         roller_on();
         // to do : foward speed should be slower when rollering
         // pid::forwardPD(1500);
-        drive::drive(8000, 200);
+        drive::drive(50000, 200);
+        //pid::drivePID(100);
         pid::delaySeconds(2);
-        roller_off();
+        //roller_off();
 
+        drive::drive(-30000, 600);
+        pid::drivePID(-500000);
         pid::stop();
+
     }
 
     void claw_open(bool open)
@@ -295,7 +306,7 @@ namespace pid
         int power = 0;
         int setPoint = abs(units);
 
-        double kP = 0.65;
+        double kP = 0.6;
         double kD = 0.2;
         double kI = 0.03;
 
@@ -352,7 +363,7 @@ namespace pid
         double derivative;
         double prevError = 0;
 
-        double kP = 3.2;
+        double kP = 3.1;
         double kD = 2;
 
         while (true)
