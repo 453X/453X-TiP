@@ -5,8 +5,10 @@ namespace drive
     void init();
     void opcontrol();
 
-    void move(int power);
+    void drive(int power);
+    void drive(int degrees, int power);
     void turn(double power);
+    void turn(double degrees, int power);
 }
 
 namespace auton
@@ -31,13 +33,12 @@ namespace pid
 
     void stop();
     void stop(double seconds);
-    void move(int power);
-    void turn(double power);
+    
 
-    void forwardPD(int units);
-    void rotateDegreesPD(double deg);
+    void drivePID(int units);
+    void turnPID(double deg);
 
-    // test 
+    // test
     void testRotate();
 
 }
