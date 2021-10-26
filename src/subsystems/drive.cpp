@@ -79,7 +79,7 @@ namespace drive
         right.moveVelocity(-power);
     }
 
-    void turn (int degrees, int power)
+    void turn(int degrees, int power)
     {
         left.moveRelative(degrees, power);
         right.moveRelative(degrees, power);
@@ -105,7 +105,6 @@ namespace auton
     {
         // debug
         pros::lcd::initialize();
-
         pid::resetDriveEncoders();
 
         // open
@@ -113,7 +112,6 @@ namespace auton
         pid::drivePID(1990);
         claw_open(false);
 
-        //pid::delaySeconds(10);
         pid::delaySeconds(0.1);
 
         // lift yellow goal
@@ -126,7 +124,6 @@ namespace auton
 
         // release yellow goal
         pid::turnPID(-90);
-        //pid::delaySeconds(5);
         lift.moveRelative(-900, 127);
         claw_open(true);
         pid::delaySeconds(0.1);
@@ -134,29 +131,27 @@ namespace auton
         // back and lift red goal
         backLift_down();
         pid::drivePID(-400);
-        //pid::delaySeconds(5);
         backLift_up();
         lift.moveRelative(900, 127);
-        //pid::delaySeconds(1.2);
+        pid::delaySeconds(1.2);
         pid::drivePID(100);
         //
         pid::turnPID(0);
-        //pid::drivePID(350);
+        // pid::drivePID(350);
         pid::stop();
         // roller
-        //pid::delaySeconds(3);
+        // pid::delaySeconds(3);
         roller_on();
         // to do : foward speed should be slower when rollering
         // pid::forwardPD(1500);
         drive::drive(50000, 200);
-        //pid::drivePID(100);
+        // pid::drivePID(100);
         pid::delaySeconds(2);
-        //roller_off();
+        // roller_off();
 
         drive::drive(-30000, 600);
         pid::drivePID(-500000);
         pid::stop();
-
     }
 
     void claw_open(bool open)
@@ -296,8 +291,6 @@ namespace pid
         return (fabs(leftEncoder.get()) + fabs(rightEncoder.get())) / 2;
     }
 
-    
-
     void drivePID(int units)
     { // power in positive, units in positive or negative
         resetDriveEncoders();
@@ -314,7 +307,7 @@ namespace pid
 
         while (avgDriveEncoders() < abs(units))
         {
-            int tune = 5;
+            int tune = 50;
             double tolerance = 0.3;
 
             double error = setPoint - avgDriveEncoders();
