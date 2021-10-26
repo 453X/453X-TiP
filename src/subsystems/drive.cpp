@@ -5,8 +5,8 @@ Motor LF(-1), LB(2), RF(3), RB(-4), liftBack(5), roller(-6), lift(7), claw(-8);
 ADIButton frontLimit('G');
 ADIButton backLimit('H');
 
-MotorGroup left({LF, LB});
-MotorGroup right({RF, RB});
+MotorGroup left({ LF, LB });
+MotorGroup right({ RF, RB });
 
 ADIEncoder middleEncoder('A', 'B');
 ADIEncoder leftEncoder('C', 'D', true);
@@ -15,29 +15,29 @@ IMU inertial(11);
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
-                     //  .withMotors(-1,3)
-                     .withMotors(
-                         {-1, 2}, // Left motors are 1 & 2
-                         {3, -4}) // Right motors are 3 & 4
+//  .withMotors(-1,3)
+.withMotors(
+    { -1, 2 }, // Left motors are 1 & 2
+    { 3, -4 }) // Right motors are 3 & 4
 
-                     .withGains(
-                         {0.00075, 0.00000, 0}, // Distance controller gains
-                         {0.00025, 0.00000, 0}, // Turn controller gains
-                         {0.00025, 0.00000, 0}  // Angle controller gains (helps drive straight)
-                         )
+    .withGains(
+        { 0.00075, 0.00000, 0 }, // Distance controller gains
+        { 0.00025, 0.00000, 0 }, // Turn controller gains
+        { 0.00025, 0.00000, 0 }  // Angle controller gains (helps drive straight)
+    )
 
-                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+    // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+    .withDimensions({ AbstractMotor::gearset::blue, (84.0 / 36.0) }, { {4_in, 35.4_cm}, imev5BlueTPR })
 
-                     // track        = distance between the center of the 2 tracking wheels
-                     // wheel track  = distance between the center of the 2 wheels on either side
+    // track        = distance between the center of the 2 tracking wheels
+    // wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
-                     // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-                     // specify the middle encoder distance (1 in) and diameter (2.75 in)
-                     .withOdometry({{2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR})
-                     .buildOdometry();
+    .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
+    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+    // specify the middle encoder distance (1 in) and diameter (2.75 in)
+    .withOdometry({ {2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR })
+    .buildOdometry();
 
 namespace drive
 {
@@ -70,7 +70,7 @@ namespace drive
 
         // Arcade drive with the left stick.
         driveOdom->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-                                      master.getAnalog(ControllerAnalog::leftX));
+            master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -79,7 +79,7 @@ namespace drive
         right.moveVelocity(-power);
     }
 
-    void turn (int degrees, int power)
+    void turn(int degrees, int power)
     {
         left.moveRelative(degrees, power);
         right.moveRelative(degrees, power);
@@ -117,7 +117,7 @@ namespace auton
         pid::delaySeconds(0.1);
 
         // lift yellow goal
-        lift.moveRelative(900, 127);
+        frontLift_up(true);
         pid::delaySeconds(0.3);
 
         // back
@@ -127,34 +127,34 @@ namespace auton
         // release yellow goal
         pid::turnPID(-90);
         //pid::delaySeconds(5);
-        lift.moveRelative(-900, 127);
+        frontLift_up(false);
         claw_open(true);
         pid::delaySeconds(0.1);
 
         // back and lift red goal
         backLift_down();
         pid::drivePID(-400);
-        //pid::delaySeconds(5);
+        pid::delaySeconds(0.2);
         backLift_up();
-        lift.moveRelative(900, 127);
-        //pid::delaySeconds(1.2);
-        pid::drivePID(100);
+        frontLift_up(true);
+        pid::delaySeconds(0.2);
+        pid::drivePID(80);
         //
         pid::turnPID(0);
-        //pid::drivePID(350);
         pid::stop();
-        // roller
-        //pid::delaySeconds(3);
-        roller_on();
-        // to do : foward speed should be slower when rollering
-        // pid::forwardPD(1500);
-        drive::drive(50000, 200);
-        //pid::drivePID(100);
-        pid::delaySeconds(2);
-        //roller_off();
 
-        drive::drive(-30000, 600);
-        pid::drivePID(-500000);
+
+        // roller
+        roller_on();
+
+        // foward speed should be slower when rollering    
+        drive::drive(50000, 100);
+        pid::drivePID(100);
+        pid::delaySeconds(4);
+        roller_off();
+
+        drive::drive(-30000, 400);
+        pid::delaySeconds(1);
         pid::stop();
 
     }
@@ -186,15 +186,26 @@ namespace auton
         liftBack.moveRelative(-2500, 100);
     }
 
+    void frontLift_up(bool up) {
+        if (up) {
+            lift.moveRelative(900, 127);
+        }
+        else {
+            lift.moveRelative(-900, 127);
+        }
+    }
+
     void roller_on()
     {
         roller.moveVoltage(12000);
     }
-
     void roller_off()
     {
         roller.moveVelocity(0);
     }
+
+
+
 }
 
 namespace pid
@@ -296,7 +307,7 @@ namespace pid
         return (fabs(leftEncoder.get()) + fabs(rightEncoder.get())) / 2;
     }
 
-    
+
 
     void drivePID(int units)
     { // power in positive, units in positive or negative
