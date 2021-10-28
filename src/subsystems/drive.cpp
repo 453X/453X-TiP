@@ -101,6 +101,44 @@ namespace drive
 
 namespace auton
 {
+    void aut() {
+
+        // initial
+        pros::lcd::initialize();
+        pid::resetDriveEncoders();
+
+        // back and left
+        backLift_down();
+        pid::delaySeconds(0.3);
+        // pid::drivePID(-950);
+        drive::drive(-17000, 100);
+        pid::delaySeconds(2);
+        backLift_up();
+        pid::delaySeconds(1);
+
+        // turn
+        pid::turnPID(90);
+        pid::delaySeconds(0.1);
+
+        // move and grab
+        claw_open(true);
+        pid::drivePID(1990);
+        claw_open(false);
+        frontLift_up_higher(true);
+        pid::delaySeconds(0.5);
+
+        // move to bridge
+        pid::turnPID(120);
+        pid::drivePID(2200);
+
+
+        // end
+        pid::delaySeconds(3);
+        pid::stop();
+
+
+    }
+
     void redRight()
     {
         // debug
@@ -187,11 +225,22 @@ namespace auton
     }
 
     void frontLift_up(bool up) {
+        int pos = 900;
         if (up) {
-            lift.moveRelative(900, 127);
+            lift.moveRelative(pos, 127);
         }
         else {
-            lift.moveRelative(-900, 127);
+            lift.moveRelative(-pos, 127);
+        }
+    }
+
+    void frontLift_up_higher(bool up) {
+        int pos = 2500;
+        if (up) {
+            lift.moveRelative(pos, 127);
+        }
+        else {
+            lift.moveRelative(-pos, 127);
         }
     }
 
