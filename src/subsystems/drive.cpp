@@ -12,6 +12,7 @@ ADIEncoder middleEncoder('A', 'B');
 ADIEncoder leftEncoder('C', 'D', true);
 ADIEncoder rightEncoder('E', 'F', false);
 IMU inertial(11);
+bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
@@ -42,6 +43,7 @@ auto driveOdom = ChassisControllerBuilder()
 namespace drive
 {
 
+
     void init()
     {
         LF.setBrakeMode(AbstractMotor::brakeMode::coast);
@@ -61,6 +63,7 @@ namespace drive
         right.setEncoderUnits(AbstractMotor::encoderUnits::degrees);
 
         pid::resetDriveEncoders();
+        driveInitDone = true;
     }
 
     void opcontrol()
@@ -103,6 +106,13 @@ namespace auton
 {
     void aut() {
 
+        // waiting for initialization
+        while (driveInitDone == false)
+        {
+            pid::delaySeconds(0.1);
+        }
+
+
         // initial
         pros::lcd::initialize();
         pid::resetDriveEncoders();
@@ -111,10 +121,14 @@ namespace auton
         backLift_down();
         pid::delaySeconds(0.3);
         // pid::drivePID(-950);
-        drive::drive(-17000, 100);
-        pid::delaySeconds(2);
+        drive::drive(-17000, 200);
+        pid::delaySeconds(1.4);
+        pid::stop();
         backLift_up();
-        pid::delaySeconds(1);
+        drive::drive(1000, 100);
+        pid::delaySeconds(0.2);
+        pid::stop();
+        pid::delaySeconds(1.8);
 
         // turn
         pid::turnPID(90);
@@ -122,7 +136,9 @@ namespace auton
 
         // move and grab
         claw_open(true);
-        pid::drivePID(1990);
+        pid::drivePID(1800);
+        drive::drive(1000, 100);
+        pid::delaySeconds(0.3);
         claw_open(false);
         frontLift_up_higher(true);
         pid::delaySeconds(0.5);
@@ -366,7 +382,7 @@ namespace pid
         int power = 0;
         int setPoint = abs(units);
 
-        double kP = 0.6;
+        double kP = 0.4;
         double kD = 0.2;
         double kI = 0.03;
 

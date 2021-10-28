@@ -1,4 +1,5 @@
 #include "main.h"
+#include "autoSelect/selection.h"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -8,11 +9,11 @@
  */
 void initialize()
 {
+    selector::init();
     drive::init();
     mogoLift::init();
     parallelLift::init();
     rollers::init();
-
     pid::inertialReset();
 
 }
@@ -47,7 +48,23 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-    auton::redRight();
+    // selector::auton == 1 : Red Front
+    // selector::auton == 2 : Red Back
+    // selector::auton == 3 : Do Nothing
+    // selector::auton == -1 : Blue Front
+    // selector::auton == -2 : Blue Back
+    // selector::auton == -3 : Do Nothing
+    // selector::auton == 0 : Skills
+
+    //
+    if (selector::auton == 1) { //run auton for Front Red 
+        auton::redRight();
+    }
+    else if (selector::auton == 0)
+    {
+        auton::aut();
+    }
+
 }
 
 /**
