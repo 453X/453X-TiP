@@ -13,11 +13,13 @@ namespace drive
 
 namespace auton
 {
+    void aut();
     void redRight();
     void claw_open(bool b);
     void backLift_down();
     void backLift_up();
     void frontLift_up(bool up);
+    void frontLift_up_higher(bool up);
     void roller_on();
     void roller_off();
 }
