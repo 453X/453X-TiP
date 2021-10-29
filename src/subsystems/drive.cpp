@@ -96,8 +96,12 @@ namespace drive
 
     void drive(int degrees, int power)
     {
-        left.moveRelative(degrees, power);
-        right.moveRelative(degrees, power);
+        pid::resetDriveEncoders();
+        while (fabs(pid::avgDriveEncoders()) < degrees)
+        {
+            drive(power);
+        }
+        pid::stop();
     }
 
 }
@@ -121,12 +125,12 @@ namespace auton
         backLift_down();
         pid::delaySeconds(0.3);
         // pid::drivePID(-950);
-        drive::drive(-17000, 200);
-        pid::delaySeconds(1.4);
+        drive::drive(1100, -300);
+        //pid::delaySeconds(1.4);
         pid::stop();
         backLift_up();
-        drive::drive(1000, 100);
-        pid::delaySeconds(0.2);
+        drive::drive(300, 100);
+        pid::delaySeconds(0.4);
         pid::stop();
         pid::delaySeconds(1.8);
 
@@ -137,7 +141,7 @@ namespace auton
         // move and grab
         claw_open(true);
         pid::drivePID(1800);
-        drive::drive(1000, 100);
+        drive::drive(200, 100);
         pid::delaySeconds(0.3);
         claw_open(false);
         frontLift_up_higher(true);
@@ -147,6 +151,9 @@ namespace auton
         pid::turnPID(120);
         pid::drivePID(2200);
 
+        // drop
+        pid::delaySeconds(0.2);
+        claw_open(true);
 
         // end
         pid::delaySeconds(3);

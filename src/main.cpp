@@ -58,7 +58,8 @@ void autonomous() {
 
     //
     if (selector::auton == 1) { //run auton for Front Red 
-        auton::redRight();
+        // auton::redRight();
+        auton::aut();
     }
     else if (selector::auton == 0)
     {
