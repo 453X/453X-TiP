@@ -14,6 +14,7 @@ namespace drive
 namespace auton
 {
     void aut();
+    void skills();
     void redRight();
     void claw_open(bool b);
     void backLift_down();

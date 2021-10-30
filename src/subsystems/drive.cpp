@@ -126,7 +126,7 @@ namespace auton
         pid::delaySeconds(0.3);
         // pid::drivePID(-950);
         drive::drive(1100, -300);
-        //pid::delaySeconds(1.4);
+        pid::delaySeconds(1.4);
         pid::stop();
         backLift_up();
         drive::drive(300, 100);
@@ -158,6 +158,39 @@ namespace auton
         // end
         pid::delaySeconds(3);
         pid::stop();
+
+
+    }
+
+    void skills()
+    {
+        // initial
+        pros::lcd::initialize();
+        pid::resetDriveEncoders();
+
+        auton::claw_open(true);
+        pid::delaySeconds(0.5);
+        drive::drive(200, 600);
+        pid::stop(0.3);
+        auton::claw_open(false);
+
+        pid::stop(0.5);
+        auton::frontLift_up(true);
+        pid::delaySeconds(0.3);
+        drive::drive(300, -200);
+        pid::delaySeconds(0.2);
+        
+        // pid::turnPID(-20);
+        // pid::drivePID(100);
+
+        pid::turnPID(-68);
+        auton::frontLift_up_higher(true);
+        pid::drivePID(4850);
+        // pid::turnPID(-90);
+        auton::frontLift_up(false);
+        pid::stop(0.5);
+        auton::claw_open(true);
+
 
 
     }

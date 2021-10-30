@@ -15,7 +15,6 @@ void initialize()
     parallelLift::init();
     rollers::init();
     pid::inertialReset();
-
 }
 
 /**
@@ -47,7 +46,8 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {
+void autonomous()
+{
     // selector::auton == 1 : Red Front
     // selector::auton == 2 : Red Back
     // selector::auton == 3 : Do Nothing
@@ -57,15 +57,35 @@ void autonomous() {
     // selector::auton == 0 : Skills
 
     //
-    if (selector::auton == 1) { //run auton for Front Red 
-        // auton::redRight();
-        auton::aut();
-    }
-    else if (selector::auton == 0)
+    if (selector::auton == 0)
     {
-        auton::aut();
+        auton::skills();
     }
 
+    else if (selector::auton == 1)
+    { // run auton for Front Red
+        auton::redRight();
+    }
+
+    else if (selector::auton == 2)
+    {
+    }
+
+    else if (selector::auton == 3)
+    {
+    }
+
+    else if (selector::auton == -1)
+    {
+    }
+
+    else if (selector::auton == -2)
+    {
+    }
+    
+    else if (selector::auton == -3)
+    {
+    }
 }
 
 /**
@@ -88,8 +108,6 @@ void opcontrol()
     parallelLift::init();
     rollers::init();
 
-
-
     while (true)
     {
         drive::opcontrol();
@@ -97,11 +115,8 @@ void opcontrol()
         parallelLift::opcontrol();
         rollers::opcontrol();
 
-
-
         // Wait and give up the time we don't need to other tasks.
         // Additionally, joystick values, motor telemetry, etc. all updates every 10 ms.
         pros::delay(10);
-
     }
 }
