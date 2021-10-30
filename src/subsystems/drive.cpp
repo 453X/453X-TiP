@@ -190,7 +190,7 @@ namespace auton
         auton::frontLift_up(false);
         pid::stop(0.5);
         auton::claw_open(true);
-
+        drive::drive(300, -200);
 
 
     }
