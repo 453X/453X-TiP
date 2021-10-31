@@ -203,7 +203,7 @@ namespace auton
 
         // open
         claw_open(true);
-        pid::drivePID(1990);
+        pid::drivePID(2050);
         claw_open(false);
 
         pid::delaySeconds(0.1);
@@ -213,7 +213,7 @@ namespace auton
         pid::delaySeconds(0.3);
 
         // back
-        pid::drivePID(-950);
+        pid::drivePID(-900);
         pid::delaySeconds(0.3);
 
         // release yellow goal
@@ -225,29 +225,33 @@ namespace auton
 
         // back and lift red goal
         backLift_down();
-        pid::drivePID(-400);
+        pid::drivePID(-500);
         pid::delaySeconds(0.2);
         backLift_up();
-        frontLift_up(true);
-        pid::delaySeconds(0.2);
-        pid::drivePID(80);
+        //frontLift_up(true);
+        pid::delaySeconds(1.5);
+        auton::roller_on();
+        pid::drivePID(1000);
         //
-        pid::turnPID(0);
-        pid::stop();
 
 
-        // roller
-        roller_on();
 
-        // foward speed should be slower when rollering    
-        drive::drive(50000, 100);
-        pid::drivePID(100);
-        pid::delaySeconds(4);
-        roller_off();
+        // pid::turnPID(0);
+        // pid::stop();
 
-        drive::drive(-30000, 400);
-        pid::delaySeconds(1);
-        pid::stop();
+
+        // // roller
+        // roller_on();
+
+        // // foward speed should be slower when rollering    
+        // drive::drive(50000, 100);
+        // pid::drivePID(100);
+        // pid::delaySeconds(4);
+        // roller_off();
+
+        // drive::drive(-30000, 400);
+        // pid::delaySeconds(1);
+        // pid::stop();
     }
 
     void claw_open(bool open)
@@ -404,9 +408,20 @@ namespace pid
         middleEncoder.reset();
     }
 
+    void resetMotorEncoders()
+    {
+        left.tarePosition();
+        right.tarePosition();
+    }
+
     double avgDriveEncoders()
     {
         return (fabs(leftEncoder.get()) + fabs(rightEncoder.get())) / 2;
+    }
+
+    double avgMotorEncoders()
+    {
+        return (fabs(left.getPosition()) + fabs(right.getPosition())) / 2;
     }
 
     void drivePID(int units)

@@ -35,6 +35,9 @@ namespace pid
     void resetDriveEncoders();
     double avgDriveEncoders();
 
+    void resetMotorEncoders();
+    double avgMotorEncoders();
+
     void stop();
     void stop(double seconds);
 
