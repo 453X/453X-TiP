@@ -41,6 +41,7 @@ namespace pid
     void stop();
     void stop(double seconds);
 
+    double time();
 
     void drivePID(int units);
     void turnPID(double deg);
