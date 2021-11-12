@@ -55,8 +55,12 @@ void autonomous()
     // selector::auton == -2 : Blue Back
     // selector::auton == -3 : Do Nothing
     // selector::auton == 0 : Skills
-
     //
+
+    // test
+    // pid::delaySeconds(3);
+    // auton::redRight();
+
     if (selector::auton == 0)
     {
         auton::skills();
@@ -82,7 +86,7 @@ void autonomous()
     else if (selector::auton == -2)
     {
     }
-    
+
     else if (selector::auton == -3)
     {
     }

@@ -197,62 +197,35 @@ namespace auton
         // pros::lcd::initialize();
         // pid::resetDriveEncoders();
 
-        // backLift_down();
-        // pid::delaySeconds(0.1);
-        // backLift_up();
-        // pid::drivePID(-200);
-        // auton::roller_on();
-        // pid::delaySeconds(10);
-        // debug
         pros::lcd::initialize();
         pid::resetDriveEncoders();
 
         // move and grab
-        pid::drivePID(950);
+        pid::drivePID(2000);
         claw_open(false);
-
-        pid::delaySeconds(0.1);
+        pid::delaySeconds(1.5);
 
         // lift yellow goal
         frontLift_up(true);
-        pid::delaySeconds(0.3);
+        pid::delaySeconds(0.5);
 
         // back
-        pid::drivePID(-300);
-        pid::delaySeconds(0.3);
+        pid::drivePID(-1000);
 
         // release yellow goal
         pid::turnPID(-90);
-        // pid::delaySeconds(5);
         frontLift_up(false);
         claw_open(true);
         pid::delaySeconds(0.1);
 
         // back and lift red goal
         backLift_down();
-        pid::drivePID(-300);
-        pid::delaySeconds(0.2);
+        pid::drivePID(-500);
         backLift_up();
-        // frontLift_up(true);
-        pid::delaySeconds(1.5);
-        auton::roller_on();
-        pid::drivePID(600);
-        //
+        frontLift_up(true);
+        pid::drivePID(50);
+        pid::turnPID(0);
 
-        // pid::turnPID(0);
-        // pid::stop();
-
-        // roller
-        // roller_on();
-
-        // foward speed should be slower when rollering
-        // drive::drive(50000, 100);
-        // pid::drivePID(100);
-        // pid::delaySeconds(4);
-        // roller_off();
-
-        // drive::drive(-30000, 400);
-        // pid::delaySeconds(1);
         pid::stop();
     }
 
@@ -269,7 +242,7 @@ namespace auton
         }
         else
         {
-            int err = claw.moveAbsolute(950, 100);
+            int err = claw.moveAbsolute(930, 100);
             // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
@@ -476,7 +449,7 @@ namespace pid
         while (avgDriveEncoders() < abs(units))
         {
             int tune = 50;
-            double tolerance = 0.3;
+            double tolerance = 1;
 
             double error = setPoint - avgDriveEncoders();
             if (error < 100)
