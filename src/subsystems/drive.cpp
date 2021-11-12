@@ -5,8 +5,8 @@ Motor LF(-1), LB(-2), RF(3), RB(4), liftBack(5), roller(-6), lift(7), claw(-8);
 ADIButton frontLimit('G');
 ADIButton backLimit('H');
 
-MotorGroup left({LF, LB});
-MotorGroup right({RF, RB});
+MotorGroup left({ LF, LB });
+MotorGroup right({ RF, RB });
 
 ADIEncoder middleEncoder('A', 'B');
 ADIEncoder leftEncoder('C', 'D', true);
@@ -17,29 +17,29 @@ bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
-                     //  .withMotors(-1,3)
-                     .withMotors(
-                         {-1, -2},   // Left motors are 1 & 2
-                         {3, 4}) // Right motors are 3 & 4
+//  .withMotors(-1,3)
+.withMotors(
+    { -1, -2 },   // Left motors are 1 & 2
+    { 3, 4 }) // Right motors are 3 & 4
 
-                     .withGains(
-                         {0.00075, 0.00000, 0}, // Distance controller gains
-                         {0.00025, 0.00000, 0}, // Turn controller gains
-                         {0.00025, 0.00000, 0}  // Angle controller gains (helps drive straight)
-                         )
+    .withGains(
+        { 0.00075, 0.00000, 0 }, // Distance controller gains
+        { 0.00025, 0.00000, 0 }, // Turn controller gains
+        { 0.00025, 0.00000, 0 }  // Angle controller gains (helps drive straight)
+    )
 
-                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+    // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+    .withDimensions({ AbstractMotor::gearset::blue, (84.0 / 36.0) }, { {4_in, 35.4_cm}, imev5BlueTPR })
 
-                     // track        = distance between the center of the 2 tracking wheels
-                     // wheel track  = distance between the center of the 2 wheels on either side
+    // track        = distance between the center of the 2 tracking wheels
+    // wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
-                     // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-                     // specify the middle encoder distance (1 in) and diameter (2.75 in)
-                     .withOdometry({{2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR})
-                     .buildOdometry();
+    .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
+    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+    // specify the middle encoder distance (1 in) and diameter (2.75 in)
+    .withOdometry({ {2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR })
+    .buildOdometry();
 
 namespace drive
 {
@@ -73,7 +73,7 @@ namespace drive
 
         // Arcade drive with the left stick.
         driveOdom->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-                                      master.getAnalog(ControllerAnalog::leftX));
+            master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -207,8 +207,7 @@ namespace auton
         pros::lcd::initialize();
         pid::resetDriveEncoders();
 
-        // open
-        claw_open(true);
+        // move and grab
         pid::drivePID(950);
         claw_open(false);
 
@@ -265,12 +264,13 @@ namespace auton
     {
         if (open)
         {
-            int err = claw.moveAbsolute(-250, 100);
+            int err = claw.moveAbsolute(0, 100);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else
         {
-            int err = claw.moveVoltage(12000);
+            int err = claw.moveAbsolute(950, 100);
+            // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
     }
@@ -330,6 +330,24 @@ namespace pid
     void testRotate()
     {
         pros::lcd::initialize();
+        pid::resetDriveEncoders();
+
+        // open
+
+        // auton::roller_on();
+        // pid::delaySeconds(1);
+        // auton::roller_off();
+
+        // auton::claw_open(true);
+        // pid::drivePID(200);
+        pid::delaySeconds(1);
+        auton::claw_open(false);
+        pid::delaySeconds(2);
+        auton::frontLift_up(true);
+        pid::delaySeconds(1);
+        // pid::drivePID(-200);
+        // auton::claw_open(true);
+
 
         // test right / left
 
@@ -341,13 +359,14 @@ namespace pid
         //     delaySeconds(5);
         // }
 
-        for (int i = 45; i <= 180; i += 45)
-        {
-            turnPID(i);
-            delaySeconds(5);
-            turnPID(-1 * i);
-            delaySeconds(5);
-        }
+
+        pros::lcd::print(6, "1 (start)");
+        turnPID(90);
+        delaySeconds(3);
+        turnPID(-90);
+        pros::lcd::print(6, "1 (done)");
+        delaySeconds(3);
+
 
         // test right
 
@@ -499,8 +518,9 @@ namespace pid
 
     void turnPID(double deg)
     {
-        double tolerance = 1;
+        double tolerance = 0.5;
         double bias = 0;
+        double minPow = 50;
 
         double derivative;
         double prevError = 0;
@@ -564,6 +584,9 @@ namespace pid
             if (error > tolerance)
             {
                 double pow = error * kP + derivative * kD;
+                if (pow < minPow) {
+                    pow = minPow;
+                }
                 if (turnRight == false)
                 {
                     // turn A(error) Left
@@ -577,18 +600,19 @@ namespace pid
                 pros::lcd::print(5, "TURN POW >> %5.2f", pow);
             }
             else
-             { //NEEDS WORK!!
-            //     initialTime = time();
+            { //NEEDS WORK!!
+           //     initialTime = time();
 
-            //     if (time() - initialTime > 3000)
-            //     {
-                    break;
-                    drive::turn(0);
+           //     if (time() - initialTime > 3000)
+           //     {
+                drive::turn(0);
+                // pros::lcd::print(5, "TURN POW >> Break");
+                break;
                 // }
             }
             derivative = error - prevError;
             prevError = error;
-            pros::delay(15);
+            pros::delay(5);
 
             drive::drive(0);
         }
