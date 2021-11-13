@@ -16,7 +16,9 @@ namespace auton
     void aut();
     void skills();
     void redRight();
+    void redRight2();
     void claw_open(bool b);
+    void deploy_claw_open(bool b);
     void backLift_down();
     void backLift_up();
     void frontLift_up(bool up);
