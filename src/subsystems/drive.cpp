@@ -8,9 +8,8 @@ ADIButton backLimit('H');
 MotorGroup left({LF, LB});
 MotorGroup right({RF, RB});
 
-ADIEncoder middleEncoder('A', 'B');
-ADIEncoder leftEncoder('C', 'D', true);
-ADIEncoder rightEncoder('E', 'F', false);
+ADIEncoder leftEncoder('A', 'B', true);
+ADIEncoder rightEncoder('C', 'D', false);
 IMU inertial(11);
 
 bool driveInitDone = false;
@@ -438,7 +437,6 @@ namespace pid
     {
         leftEncoder.reset();
         rightEncoder.reset();
-        middleEncoder.reset();
     }
 
     void resetMotorEncoders()
