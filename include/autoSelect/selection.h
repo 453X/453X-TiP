@@ -5,7 +5,7 @@
 //selector configuration
 #define HUE 46
 #define DEFAULT 1
-#define AUTONS "Front", "Back", "Do Nothing"
+#define AUTONS "Right", "Left", "Do Nothing"
 
 namespace selector {
 

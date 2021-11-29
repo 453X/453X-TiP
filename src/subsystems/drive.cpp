@@ -12,6 +12,8 @@ ADIEncoder leftEncoder('A', 'B', true);
 ADIEncoder rightEncoder('C', 'D', false);
 IMU inertial(11);
 
+Timer timer;
+
 bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
@@ -191,6 +193,44 @@ namespace auton
         drive::drive(300, -200);
     }
 
+    void rightOneGoal()
+    {
+        pros::lcd::initialize();
+        pid::resetDriveEncoders();
+        claw.tarePosition();
+
+        // move and grab
+        pid::drivePID(1700);
+        claw_open(false);
+        pid::delaySeconds(1.5);
+
+        // lift yellow goal
+        frontLift_up(true);
+        pid::delaySeconds(0.5);
+
+        // back
+        pid::drivePID(-1000);
+
+        // release yellow goal
+        pid::turnPID(-90);
+        frontLift_up(false);
+        claw_open(true);
+        pid::delaySeconds(0.1);
+
+        // back and lift red goal
+        backLift_down();
+        pid::drivePID(-500);
+        backLift_up();
+        frontLift_up(true);
+        pid::drivePID(50);
+        auton::roller_on();
+        pid::turnPID(180);
+        pid::drivePID(500);
+        pid::drivePID(-500);
+
+        pid::stop();
+    }
+
     void redRight()
     {
         // pros::lcd::initialize();
@@ -198,9 +238,10 @@ namespace auton
 
         pros::lcd::initialize();
         pid::resetDriveEncoders();
+        claw.tarePosition();
 
         // move and grab
-        pid::drivePID(2000);
+        pid::drivePID(1700);
         claw_open(false);
         pid::delaySeconds(1.5);
 
@@ -274,7 +315,7 @@ namespace auton
         }
         else
         {
-            int err = claw.moveAbsolute(930, 100);
+            int err = claw.moveAbsolute(700, 100);
             // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
@@ -455,11 +496,6 @@ namespace pid
         return (fabs(left.getPosition()) + fabs(right.getPosition())) / 2;
     }
 
-    double time()
-    {
-        return pros::c::millis();
-    }
-
     void drivePID(int units)
     { // power in positive, units in positive or negative
         resetDriveEncoders();
@@ -468,16 +504,16 @@ namespace pid
         int power = 0;
         int setPoint = abs(units);
 
-        double kP = 0.4;
-        double kD = 0.2;
-        double kI = 0.03;
+        double kP = 0.8;
+        double kD = 0.35;
+        double kI = 0.01;
 
         double errorSum = 0;
 
         while (avgDriveEncoders() < abs(units))
         {
-            int tune = 50;
-            double tolerance = 1;
+            int tune = 60;
+            double tolerance = 3.0;
 
             double error = setPoint - avgDriveEncoders();
             if (error < 100)
@@ -496,21 +532,23 @@ namespace pid
             derivative = error - prevError;
             prevError = error;
 
-            if (inertial.get() > rotation + tolerance)
-            {
-                left.moveVelocity(power - tune);
-                right.moveVelocity(power + tune);
-            }
-            else if (inertial.get() < rotation - tolerance)
-            {
-                left.moveVelocity(power + tune);
-                right.moveVelocity(power - tune);
-            }
-            else
-            {
-                left.moveVelocity(power);
-                right.moveVelocity(power);
-            }
+            //===============================================
+
+            // if (inertial.get() > rotation + tolerance)
+            // {
+            //     left.moveVelocity(power - tune);
+            //     right.moveVelocity(power + tune);
+            // }
+            // else if (inertial.get() < rotation - tolerance)
+            // {
+            //     left.moveVelocity(power + tune);
+            //     right.moveVelocity(power - tune);
+            // }
+            // else
+            // {
+            //     left.moveVelocity(power);
+            //     right.moveVelocity(power);
+            // }
 
             pros::delay(10);
         }
@@ -526,10 +564,8 @@ namespace pid
         double derivative;
         double prevError = 0;
 
-        double kP = 3.1;
-        double kD = 2;
-
-        double initialTime = 0;
+        double kP = 5.0;
+        double kD = 2.0;
 
         while (true)
         {
@@ -602,15 +638,15 @@ namespace pid
                 pros::lcd::print(5, "TURN POW >> %5.2f", pow);
             }
             else
-            { // NEEDS WORK!!
-                //     initialTime = time();
+            {
+                // timer.placeMark();
 
-                //     if (time() - initialTime > 3000)
-                //     {
-                drive::turn(0);
-                // pros::lcd::print(5, "TURN POW >> Break");
-                break;
+                // while ((fabs(error) < tolerance && timer.getDtFromMark() >= 1_s))
+                // {
                 // }
+
+                drive::turn(0);
+                    break;
             }
             derivative = error - prevError;
             prevError = error;
