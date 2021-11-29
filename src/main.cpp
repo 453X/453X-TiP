@@ -73,6 +73,8 @@ void autonomous()
 
     else if (selector::auton == 2)
     {
+        auton::skills();
+
     }
 
     else if (selector::auton == 3)

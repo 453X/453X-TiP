@@ -202,33 +202,37 @@ namespace auton
         // move and grab
         pid::drivePID(1700);
         claw_open(false);
-        pid::delaySeconds(1.5);
+        pid::delaySeconds(1.0);
 
         // lift yellow goal
         frontLift_up(true);
         pid::delaySeconds(0.5);
 
         // back
-        pid::drivePID(-1000);
+        pid::drivePID(-1100);
 
         // release yellow goal
         pid::turnPID(-90);
+        drive::drive(100, 100);
         frontLift_up(false);
         claw_open(true);
         pid::delaySeconds(0.1);
 
         // back and lift red goal
         backLift_down();
-        pid::drivePID(-500);
+        pid::drivePID(-600);
         backLift_up();
         frontLift_up(true);
         pid::drivePID(50);
         auton::roller_on();
         pid::turnPID(180);
-        pid::drivePID(500);
-        pid::drivePID(-500);
+        drive::drive(200, 500);
+        drive::drive(-200, 500);
+        drive::drive(200, 500);
+        drive::drive(-200, 500);
 
         pid::stop();
+
     }
 
     void redRight()
@@ -315,7 +319,7 @@ namespace auton
         }
         else
         {
-            int err = claw.moveAbsolute(700, 100);
+            int err = claw.moveAbsolute(800, 100);
             // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
@@ -534,21 +538,21 @@ namespace pid
 
             //===============================================
 
-            // if (inertial.get() > rotation + tolerance)
-            // {
-            //     left.moveVelocity(power - tune);
-            //     right.moveVelocity(power + tune);
-            // }
-            // else if (inertial.get() < rotation - tolerance)
-            // {
-            //     left.moveVelocity(power + tune);
-            //     right.moveVelocity(power - tune);
-            // }
-            // else
-            // {
-            //     left.moveVelocity(power);
-            //     right.moveVelocity(power);
-            // }
+            if (inertial.get() > rotation + tolerance)
+            {
+                left.moveVelocity(power/* - tune*/);
+                right.moveVelocity(power/* + tune*/);
+            }
+            else if (inertial.get() < rotation - tolerance)
+            {
+                left.moveVelocity(power/* + tune*/);
+                right.moveVelocity(power/* - tune*/);
+            }
+            else
+            {
+                left.moveVelocity(power);
+                right.moveVelocity(power);
+            }
 
             pros::delay(10);
         }
