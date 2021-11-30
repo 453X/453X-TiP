@@ -201,15 +201,14 @@ namespace auton
 
         // move and grab
         pid::drivePID(1700);
-        claw_open(false);
-        pid::delaySeconds(1.0);
+        pid::delaySeconds(0.5);
 
         // lift yellow goal
         frontLift_up(true);
         pid::delaySeconds(0.5);
 
         // back
-        pid::drivePID(-1100);
+        pid::drivePID(-1200);
 
         // release yellow goal
         pid::turnPID(-90);
@@ -220,16 +219,14 @@ namespace auton
 
         // back and lift red goal
         backLift_down();
-        pid::drivePID(-600);
+        pid::drivePID(-700);
         backLift_up();
         frontLift_up(true);
         pid::drivePID(50);
         auton::roller_on();
-        pid::turnPID(180);
-        drive::drive(200, 500);
-        drive::drive(-200, 500);
-        drive::drive(200, 500);
-        drive::drive(-200, 500);
+        pid::turnPID(0);
+        drive::drive(100, 1000);
+        drive::drive(-200, 1000);
 
         pid::stop();
 
@@ -498,6 +495,23 @@ namespace pid
     double avgMotorEncoders()
     {
         return (fabs(left.getPosition()) + fabs(right.getPosition())) / 2;
+    }
+
+    void drivePIDwithClaw(int units)
+    {
+        auton::claw_open(true);
+        if(units > 500)
+        {
+            drive::drive(200, units-500);
+            auton::claw_open(false);
+            drivePID(500);
+        } 
+        else 
+        {
+            drivePID(units);
+            auton::claw_open(false);
+        }
+
     }
 
     void drivePID(int units)
