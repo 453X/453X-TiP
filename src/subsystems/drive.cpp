@@ -167,30 +167,36 @@ namespace auton
         // initial
         pros::lcd::initialize();
         pid::resetDriveEncoders();
-
+        claw.tarePosition();
+        
+        drive::drive(3500, -250);
+        pid::delaySeconds(0.3);
+        pid::turnPID(27);
+        pid::drivePID(1050);
+        claw_open(false);
+        pid::delaySeconds(1.0);
+        pid::turnPID(38);
+        frontLift_up_higher(true);
+        pid::drivePID(2500);
+        pid::delaySeconds(0.5);
+        pid::turnPID(0);
+        frontLift_up(false);
+        drive::drive(100, 100);
+        pid::delaySeconds(0.3);
         auton::claw_open(true);
         pid::delaySeconds(0.5);
-        drive::drive(200, 600);
-        pid::stop(0.3);
-        auton::claw_open(false);
-
-        pid::stop(0.5);
-        auton::frontLift_up(true);
+        pid::turnPID(0);
+        pid::drivePID(-1300);
         pid::delaySeconds(0.3);
-        drive::drive(300, -200);
+        pid::turnPID(-40);
+        frontLift_up(false);
+        pid::drivePID(-2000);
+        pid::delaySeconds(0.3);
+        pid::turnPID(90);
         pid::delaySeconds(0.2);
+        pid::drivePID(700);
 
-        // pid::turnPID(-20);
-        // pid::drivePID(100);
 
-        pid::turnPID(-68);
-        auton::frontLift_up_higher(true);
-        pid::drivePID(4850);
-        // pid::turnPID(-90);
-        auton::frontLift_up(false);
-        pid::stop(0.5);
-        auton::claw_open(true);
-        drive::drive(300, -200);
     }
 
     void leftRing()
@@ -564,7 +570,7 @@ namespace pid
 
         while (avgDriveEncoders() < abs(units))
         {
-            int tune = 60;
+            int tune = 0;
             double tolerance = 3.0;
 
             double error = setPoint - avgDriveEncoders();
@@ -588,13 +594,13 @@ namespace pid
 
             if (inertial.get() > rotation + tolerance)
             {
-                left.moveVelocity(power/* - tune*/);
-                right.moveVelocity(power/* + tune*/);
+                left.moveVelocity(power - tune);
+                right.moveVelocity(power + tune);
             }
             else if (inertial.get() < rotation - tolerance)
             {
-                left.moveVelocity(power/* + tune*/);
-                right.moveVelocity(power/* - tune*/);
+                left.moveVelocity(power + tune);
+                right.moveVelocity(power - tune);
             }
             else
             {
