@@ -18,6 +18,7 @@ namespace auton
     void redRight();
     void redRight2();
     void rightOneGoal();
+    void leftRing();
 
     void claw_open(bool b);
     void deploy_claw_open(bool b);
@@ -44,7 +45,7 @@ namespace pid
 
     void stop();
     void stop(double seconds);
-    
+
     void drivePID(int units);
     void turnPID(double deg);
 
