@@ -26,6 +26,7 @@ namespace auton
     void backLift_up();
     void frontLift_up(bool up);
     void frontLift_up_higher(bool up);
+    void frontLift_down();
     void roller_on();
     void roller_off();
 }
@@ -50,8 +51,5 @@ namespace pid
     void turnPID(double deg);
 
     void drivePIDwithClaw(int units);
-
-    // test
-    void testRotate();
 
 }
