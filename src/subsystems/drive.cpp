@@ -153,22 +153,26 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
-        drive::drive(3500, -300);
-        pid::delaySeconds(0.3);
-        pid::turnPID(27);
-        pid::drivePID(1050);
-        claw_open(false);
-        pid::delaySeconds(1.0);
-        pid::turnPID(38);
-        frontLift_up_higher(true);
-        pid::drivePID(2500);
-        pid::delaySeconds(0.5);
-        pid::turnPID(0);
-        //frontLift_up(false);
-        drive::drive(120, 100);
-        pid::delaySeconds(0.3);
-        auton::claw_open(true);
-        //backLift_down();
+        // drive::drive(3500, -300);
+        // pid::delaySeconds(0.3);
+        // pid::turnPID(27);
+        // pid::drivePID(1050);
+        // claw_open(false);
+        // pid::delaySeconds(1.0);
+        // pid::turnPID(38);
+        // frontLift_up_higher(true);
+        // pid::drivePID(2500);
+        // pid::delaySeconds(0.5);
+        // pid::turnPID(0);
+        // //frontLift_up(false);
+        // drive::drive(120, 100);
+        // pid::delaySeconds(0.3);
+        // auton::claw_open(true);
+        // //backLift_down();
+
+
+
+
         pid::delaySeconds(0.5);
         pid::turnPID(0);
         pid::drivePID(-1300);
@@ -179,11 +183,11 @@ namespace auton
         pid::delaySeconds(0.3);
         pid::turnPID(100);
         pid::delaySeconds(0.2);
-        pid::drivePID(1200);
+        pid::drivePID(1100);
         auton::claw_open(false);
         pid::delaySeconds(1.1);
-        pid::drivePID(-1200);
-        pid::turnPID(20);
+        pid::drivePID(-1600);
+        pid::turnPID(45);
         pid::drivePID(2500);
     }
 
