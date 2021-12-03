@@ -187,8 +187,15 @@ namespace auton
         auton::claw_open(false);
         pid::delaySeconds(1.1);
         pid::drivePID(-1600);
-        pid::turnPID(45);
-        pid::drivePID(2500);
+        pid::turnPID(225);
+        pid::drivePID(-2500);
+        pid::drivePID(1000);
+        pid::turnPID(270);
+        pid::drivePID(1000);
+        pid::turnPID(0);
+        drive::drive(120, 100);
+        claw_open(true);
+        
     }
 
     void leftRing()
@@ -253,9 +260,10 @@ namespace auton
         auton::roller_on();
         pid::turnPID(180);
         pid::delaySeconds(0.4);
-        drive::drive(800, 70);
+        drive::drive(700, 70);
         pid::delaySeconds(0.5);
         backLift_down();
+        drive::drive(100, 200);
         // drive::drive(500, -200);
         // pid::delaySeconds(1.0);
         // drive::drive(500, 100);
