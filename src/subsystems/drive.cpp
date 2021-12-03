@@ -153,22 +153,22 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
-        // drive::drive(3500, -300);
-        // pid::delaySeconds(0.3);
-        // pid::turnPID(27);
-        // pid::drivePID(1050);
-        // claw_open(false);
-        // pid::delaySeconds(1.0);
-        // pid::turnPID(38);
-        // frontLift_up_higher(true);
-        // pid::drivePID(2500);
-        // pid::delaySeconds(0.5);
-        // pid::turnPID(0);
-        // //frontLift_up(false);
-        // drive::drive(120, 100);
-        // pid::delaySeconds(0.3);
-        // auton::claw_open(true);
-        // //backLift_down();
+        drive::drive(3500, -300);
+        pid::delaySeconds(0.3);
+        pid::turnPID(27);
+        pid::drivePID(1050);
+        claw_open(false);
+        pid::delaySeconds(1.0);
+        pid::turnPID(38);
+        frontLift_up_higher(true);
+        pid::drivePID(2500);
+        pid::delaySeconds(0.5);
+        pid::turnPID(0);
+        //frontLift_up(false);
+        drive::drive(120, 100);
+        pid::delaySeconds(0.3);
+        auton::claw_open(true);
+        //backLift_down();
 
 
 
@@ -221,11 +221,12 @@ namespace auton
         pros::lcd::initialize();
         pid::resetDriveEncoders();
         claw.tarePosition();
+        lift.tarePosition();
 
         // move and grab
         pid::drivePIDwithClaw(1700);
-        claw_open(false);
-        pid::delaySeconds(1.0);
+        //claw_open(false);
+        pid::delaySeconds(0.8);
 
         // lift yellow goal
         frontLift_up(true);
@@ -244,16 +245,20 @@ namespace auton
         // back and lift red goal
         backLift_down();
         pid::drivePID(-550);
+        drive::drive(-300, 100);
         backLift_up();
+        pid::delaySeconds(0.5);
         frontLift_up(true);
         pid::drivePID(50);
         auton::roller_on();
         pid::turnPID(180);
-        drive::drive(1000, 100);
+        pid::delaySeconds(0.4);
+        drive::drive(800, 70);
         pid::delaySeconds(0.5);
-        drive::drive(500, -200);
-        pid::delaySeconds(0.5);
-        drive::drive(500, 100);
+        backLift_down();
+        // drive::drive(500, -200);
+        // pid::delaySeconds(1.0);
+        // drive::drive(500, 100);
         // drive::drive(-200, 1000);
 
         pid::stop();
@@ -467,11 +472,11 @@ namespace pid
     void drivePIDwithClaw(int units)
     {
         auton::claw_open(true);
-        if (units > 500)
+        if (units > 400)
         {
-            drive::drive(units - 500, 600);
+            drive::drive(units - 400, 600);
             auton::claw_open(false);
-            drivePID(500);
+            drivePID(400);
         }
         else
         {
