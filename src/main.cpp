@@ -82,6 +82,7 @@ void autonomous()
 
         else if (selector::auton == 3)
         {
+            auton::leftGoal();
         }
 
         else if (selector::auton == -1)
@@ -96,6 +97,7 @@ void autonomous()
 
         else if (selector::auton == -3)
         {
+            auton::leftGoal();
         }
 }
 

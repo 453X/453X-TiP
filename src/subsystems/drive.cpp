@@ -272,6 +272,34 @@ namespace auton
         pid::stop();
     }
 
+    void leftGoal()
+    {
+        pros::lcd::initialize();
+        pid::resetDriveEncoders();
+        claw.tarePosition();
+        lift.tarePosition();
+
+        // move and grab
+        pid::drivePIDwithClaw(1900);
+        //claw_open(false);
+        pid::delaySeconds(0.8);
+
+        // lift yellow goal
+        frontLift_up(true);
+        pid::delaySeconds(0.5);
+
+        // back
+        pid::drivePID(-1200);
+
+        // release yellow goal
+        pid::turnPID(180);
+        drive::drive(100, 100);
+        frontLift_up(false);
+        claw_open(true);
+        pid::delaySeconds(0.1);
+
+    }
+
     void redRight()
     {
         // pros::lcd::initialize();

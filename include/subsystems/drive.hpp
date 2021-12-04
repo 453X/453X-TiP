@@ -18,6 +18,7 @@ namespace auton
     void redRight();
     void redRight2();
     void rightOneGoal();
+    void leftGoal();
     void leftRing();
 
     void claw_open(bool b);
