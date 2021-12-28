@@ -9,7 +9,7 @@ namespace mogoLift
 
     void init()
     {
-        lift.setBrakeMode(AbstractMotor::brakeMode::brake);
+        lift.setBrakeMode(AbstractMotor::brakeMode::hold);
     }
 
     void opcontrol()

@@ -23,24 +23,15 @@ auto driveOdom = ChassisControllerBuilder()
                          {-1, -2}, // Left motors are 1 & 2
                          {3, 4})   // Right motors are 3 & 4
 
-                     .withGains(
-                         {0.00075, 0.00000, 0}, // Distance controller gains
-                         {0.00025, 0.00000, 0}, // Turn controller gains
-                         {0.00025, 0.00000, 0}  // Angle controller gains (helps drive straight)
-                         )
-
                      // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+                     .withDimensions({AbstractMotor::gearset::green, (1.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
 
                      // track        = distance between the center of the 2 tracking wheels
                      // wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder /*, middleEncoder*/)
-                     // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-                     // specify the middle encoder distance (1 in) and diameter (2.75 in)
-                     .withOdometry({{2.75_in, 13.2_cm /*, 1_in, 2.75_in*/}, quadEncoderTPR})
-                     .buildOdometry();
+                     .withSensors(leftEncoder, rightEncoder)
+                     .build();
 
 namespace drive
 {
@@ -231,7 +222,7 @@ namespace auton
         lift.tarePosition();
 
         // move and grab
-        pid::drivePIDwithClaw(1700);
+        pid::drivePIDwithClaw(1800);
         //claw_open(false);
         pid::delaySeconds(0.8);
 
@@ -310,7 +301,7 @@ namespace auton
         claw.tarePosition();
 
         // move and grab
-        pid::drivePID(1700);
+        pid::drivePID(1750);
         claw_open(false);
         pid::delaySeconds(1.5);
 
@@ -400,7 +391,7 @@ namespace auton
     }
     void backLift_up()
     {
-        liftBack.moveRelative(-2500, 100);
+        liftBack.moveRelative(-1800, 100);
     }
 
     void frontLift_up(bool up)
@@ -507,12 +498,13 @@ namespace pid
 
     void drivePIDwithClaw(int units)
     {
+        int setpoint = 1000;
         auton::claw_open(true);
-        if (units > 400)
+        if (units > setpoint)
         {
-            drive::drive(units - 400, 600);
+            drive::drive(units - setpoint, 600);
             auton::claw_open(false);
-            drivePID(400);
+            drivePID(setpoint);
         }
         else
         {
