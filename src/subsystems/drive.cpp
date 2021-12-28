@@ -25,7 +25,7 @@ auto driveOdom = ChassisControllerBuilder()
 
                      // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::green, (1.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
 
                      // track        = distance between the center of the 2 tracking wheels
                      // wheel track  = distance between the center of the 2 wheels on either side
@@ -216,16 +216,22 @@ namespace auton
 
     void rightOneGoal()
     {
+        pid::inertialReset();
+
         pros::lcd::initialize();
         pid::resetDriveEncoders();
         claw.tarePosition();
         lift.tarePosition();
 
-        // move and grab
-        pid::drivePIDwithClaw(1800);
-        //claw_open(false);
-        pid::delaySeconds(0.8);
 
+        // move and grab
+        pid::drivePID(1700);
+
+        // drive::drive(1700, 600);
+
+        // claw_open(false);
+        // pid::delaySeconds(0.8);
+/*
         // lift yellow goal
         frontLift_up(true);
         pid::delaySeconds(0.5);
@@ -259,7 +265,7 @@ namespace auton
         // pid::delaySeconds(1.0);
         // drive::drive(500, 100);
         // drive::drive(-200, 1000);
-
+*/
         pid::stop();
     }
 
@@ -526,11 +532,13 @@ namespace pid
         double kI = 0.01;
 
         double errorSum = 0;
+        int fr = 0 ;
+        int fl = 0 ;
 
         while (avgDriveEncoders() < abs(units))
         {
             int tune = 0;
-            double tolerance = 3.0;
+            double tolerance = 0.5;
 
             double error = setPoint - avgDriveEncoders();
             if (error < 100)
@@ -545,26 +553,31 @@ namespace pid
             pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
             pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
             pros::lcd::print(2, "error   >> %5.2f", error);
-
+            pros::lcd::print(3, "fl,fr >> %3d , %3d", fl,fr);
             derivative = error - prevError;
             prevError = error;
 
             //===============================================
 
+            float rRate = 0.5f;
+            float lRate = 1.0f;
+
             if (inertial.get() > rotation + tolerance)
             {
-                left.moveVelocity(power - tune);
-                right.moveVelocity(power + tune);
+                left.moveVelocity(power*lRate - tune);
+                right.moveVelocity(power*rRate + tune);
+                fl++;
             }
             else if (inertial.get() < rotation - tolerance)
             {
-                left.moveVelocity(power + tune);
-                right.moveVelocity(power - tune);
+                left.moveVelocity(power*lRate + tune);
+                right.moveVelocity(power*rRate - tune);
+                fr++;
             }
             else
             {
-                left.moveVelocity(power);
-                right.moveVelocity(power);
+                left.moveVelocity(power*lRate);
+                right.moveVelocity(power*rRate);
             }
 
             pros::delay(10);
