@@ -50,6 +50,7 @@ namespace pid
 
     void drivePID(int units);
     void turnPID(double deg);
+    void distancePID(int units);
 
     void drivePIDwithClaw(int units);
 

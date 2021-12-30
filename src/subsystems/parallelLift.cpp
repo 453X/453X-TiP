@@ -18,6 +18,7 @@ namespace parallelLift
         ControllerButton R1(ControllerDigital::R1);
         ControllerButton x(ControllerDigital::X);
         ControllerButton b(ControllerDigital::B);
+        ControllerButton up(ControllerDigital::up);
         ControllerButton shift(ControllerDigital::L2);
 
         if (shift.isPressed())

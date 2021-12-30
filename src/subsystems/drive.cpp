@@ -10,7 +10,10 @@ MotorGroup right({RF, RB});
 
 ADIEncoder leftEncoder('A', 'B', true);
 ADIEncoder rightEncoder('C', 'D', false);
+
 IMU inertial(11);
+DistanceSensor dist1(12);
+DistanceSensor dist2(13);
 
 Timer timer;
 
@@ -100,37 +103,37 @@ namespace drive
 
 void driveTurnCorrection(int units, int power)
 {
-        pid::resetDriveEncoders();
-        int direction = abs(units) / units;
-        double rotation = inertial.get();
-        int setPoint = abs(units);
+    pid::resetDriveEncoders();
+    int direction = abs(units) / units;
+    double rotation = inertial.get();
+    int setPoint = abs(units);
 
-        while (pid::avgDriveEncoders() < abs(units))
+    while (pid::avgDriveEncoders() < abs(units))
+    {
+        int tune = 30;
+        double tolerance = 3.0;
+
+        //===============================================
+
+        if (inertial.get() > rotation + tolerance)
         {
-            int tune = 30;
-            double tolerance = 3.0;
-
-            //===============================================
-
-            if (inertial.get() > rotation + tolerance)
-            {
-                left.moveVelocity(power - tune);
-                right.moveVelocity(power + tune);
-            }
-            else if (inertial.get() < rotation - tolerance)
-            {
-                left.moveVelocity(power + tune);
-                right.moveVelocity(power - tune);
-            }
-            else
-            {
-                left.moveVelocity(power);
-                right.moveVelocity(power);
-            }
-
-            pros::delay(10);
+            left.moveVelocity(power - tune);
+            right.moveVelocity(power + tune);
         }
-        pid::stop(0);
+        else if (inertial.get() < rotation - tolerance)
+        {
+            left.moveVelocity(power + tune);
+            right.moveVelocity(power - tune);
+        }
+        else
+        {
+            left.moveVelocity(power);
+            right.moveVelocity(power);
+        }
+
+        pros::delay(10);
+    }
+    pid::stop(0);
 }
 
 namespace auton
@@ -144,49 +147,24 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
-        drive::drive(3500, -300);
-        pid::delaySeconds(0.3);
-        pid::turnPID(27);
-        pid::drivePID(1050);
-        claw_open(false);
-        pid::delaySeconds(1.0);
-        pid::turnPID(38);
-        frontLift_up_higher(true);
-        pid::drivePID(2500);
+        pid::turnPID(45);
+        backLift_down();
         pid::delaySeconds(0.5);
-        pid::turnPID(0);
-        //frontLift_up(false);
-        drive::drive(120, 100);
-        pid::delaySeconds(0.3);
-        auton::claw_open(true);
-        //backLift_down();
-
-
-
-
-        pid::delaySeconds(0.5);
-        pid::turnPID(0);
-        pid::drivePID(-1300);
-        pid::delaySeconds(0.3);
-        pid::turnPID(-40);
-        pid::drivePID(-1700);
-        frontLift_down();
-        pid::delaySeconds(0.3);
-        pid::turnPID(100);
-        pid::delaySeconds(0.2);
-        pid::drivePID(1100);
-        auton::claw_open(false);
-        pid::delaySeconds(1.1);
-        pid::drivePID(-1600);
-        pid::turnPID(225);
-        pid::drivePID(-2500);
-        pid::drivePID(1000);
-        pid::turnPID(270);
-        pid::drivePID(1000);
-        pid::turnPID(0);
-        drive::drive(120, 100);
-        claw_open(true);
         
+        drive::drive(700, -200);
+        backLift_up();
+        pid::delaySeconds(0.5);
+        drive::drive(300, 200);
+
+        pid::turnPID(160);
+
+        pid::drivePID(1400);
+        claw_open(false);
+        pid::delaySeconds(1.2);
+        pid::turnPID(140);
+
+
+
     }
 
     void leftRing()
@@ -196,7 +174,7 @@ namespace auton
         claw.tarePosition();
 
         auton::backLift_down();
-        drive::drive(1050, -150);
+        drive::drive(500, -150);
         pid::delaySeconds(1.0);
         backLift_up();
 
@@ -206,7 +184,7 @@ namespace auton
 
         auton::roller_on();
 
-        drive::drive(1500, 80);
+        drive::drive(1500, 50);
         pid::stop();
 
         pid::delaySeconds(1.0);
@@ -223,15 +201,14 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
-
         // move and grab
         pid::drivePID(1700);
 
         // drive::drive(1700, 600);
 
-        // claw_open(false);
-        // pid::delaySeconds(0.8);
-/*
+        claw_open(false);
+        pid::delaySeconds(1.4);
+
         // lift yellow goal
         frontLift_up(true);
         pid::delaySeconds(0.5);
@@ -265,7 +242,7 @@ namespace auton
         // pid::delaySeconds(1.0);
         // drive::drive(500, 100);
         // drive::drive(-200, 1000);
-*/
+
         pid::stop();
     }
 
@@ -278,7 +255,7 @@ namespace auton
 
         // move and grab
         pid::drivePIDwithClaw(1900);
-        //claw_open(false);
+        // claw_open(false);
         pid::delaySeconds(0.8);
 
         // lift yellow goal
@@ -294,7 +271,6 @@ namespace auton
         frontLift_up(false);
         claw_open(true);
         pid::delaySeconds(0.1);
-
     }
 
     void redRight()
@@ -394,10 +370,11 @@ namespace auton
             liftBack.moveVoltage(12000);
         }
         liftBack.moveVelocity(0);
+        liftBack.tarePosition();
     }
     void backLift_up()
     {
-        liftBack.moveRelative(-1800, 100);
+        liftBack.moveRelative(-1400, 100);
     }
 
     void frontLift_up(bool up)
@@ -528,56 +505,68 @@ namespace pid
         int setPoint = abs(units);
 
         double kP = 0.8;
-        double kD = 0.35;
         double kI = 0.01;
+        double kD = 0.35;
+
+        double kP_angular = 100;
 
         double errorSum = 0;
-        int fr = 0 ;
-        int fl = 0 ;
+        int fr = 0;
+        int fl = 0;
 
         while (avgDriveEncoders() < abs(units))
         {
-            int tune = 0;
             double tolerance = 0.5;
-
             double error = setPoint - avgDriveEncoders();
+            double angularError;
+
+
+            int tune = 20;
+
             if (error < 100)
                 errorSum += error;
             double prevError = 0;
             double derivative;
 
-            power = direction * (error * kP + derivative * kD + errorSum * kI);
+            if (direction * (error * kP + derivative * kD + errorSum * kI) >= 500)
+            {
+                power = 500;
+            }
+            else
+            {
+                power = direction * (error * kP + derivative * kD + errorSum * kI);
+            }
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
             // fabs(driveLF.get_position()));
             pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
             pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
             pros::lcd::print(2, "error   >> %5.2f", error);
-            pros::lcd::print(3, "fl,fr >> %3d , %3d", fl,fr);
+            pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
             derivative = error - prevError;
             prevError = error;
 
             //===============================================
 
-            float rRate = 0.5f;
+            float rRate = 1.0f;
             float lRate = 1.0f;
 
             if (inertial.get() > rotation + tolerance)
             {
-                left.moveVelocity(power*lRate - tune);
-                right.moveVelocity(power*rRate + tune);
+                left.moveVelocity(power * lRate - tune);
+                right.moveVelocity(power * rRate + tune);
                 fl++;
             }
             else if (inertial.get() < rotation - tolerance)
             {
-                left.moveVelocity(power*lRate + tune);
-                right.moveVelocity(power*rRate - tune);
+                left.moveVelocity(power * lRate + tune);
+                right.moveVelocity(power * rRate - tune);
                 fr++;
             }
             else
             {
-                left.moveVelocity(power*lRate);
-                right.moveVelocity(power*rRate);
+                left.moveVelocity(power * lRate);
+                right.moveVelocity(power * rRate);
             }
 
             pros::delay(10);
@@ -684,6 +673,102 @@ namespace pid
 
             drive::drive(0);
         }
+    }
+
+        void distancePID(int units)
+    { // power in positive, units in positive or negative
+        resetDriveEncoders();
+        int direction = abs(units) / units;
+        double rotation = inertial.get();
+        int power = 0;
+        int setPoint = abs(units);
+        double tolerance = 1.0;
+
+        double kP = 0.8;
+        double kI = 0.01;
+        double kD = 0.35;
+
+        double error; 
+
+        if(units > 0)
+        {
+            error = dist1.get() - setPoint;
+        }
+        else 
+        {
+            error = dist2.get() - setPoint;
+        }
+
+        double errorSum = 0;
+        int fr = 0;
+        int fl = 0;
+
+        while (error >= tolerance);
+        {
+            double tolerance = 0.5;
+            double angularError;
+
+
+            int tune = 20;
+
+            if(direction > 0)
+            {
+                error = dist1.get() - setPoint;
+            }
+            else 
+            {
+                error = dist2.get() - setPoint;
+            }
+
+            if (error < 100)
+                errorSum += error;
+            double prevError = 0;
+            double derivative;
+
+            if (direction * (error * kP + derivative * kD + errorSum * kI) >= 500)
+            {
+                power = 500;
+            }
+            else
+            {
+                power = direction * (error * kP + derivative * kD + errorSum * kI);
+            }
+
+            // pros::lcd::print(0, "Get encoder  >> %f\n",
+            // fabs(driveLF.get_position()));
+            pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
+            pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
+            pros::lcd::print(2, "error   >> %5.2f", error);
+            pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
+            derivative = error - prevError;
+            prevError = error;
+
+            //===============================================
+
+            float rRate = 1.0f;
+            float lRate = 1.0f;
+
+            if (inertial.get() > rotation + tolerance)
+            {
+                left.moveVelocity(power * lRate - tune);
+                right.moveVelocity(power * rRate + tune);
+                fl++;
+            }
+            else if (inertial.get() < rotation - tolerance)
+            {
+                left.moveVelocity(power * lRate + tune);
+                right.moveVelocity(power * rRate - tune);
+                fr++;
+            }
+            else
+            {
+                left.moveVelocity(power * lRate);
+                right.moveVelocity(power * rRate);
+            }
+
+            pros::delay(10);
+        }
+        stop(0);
     }
 
 }
