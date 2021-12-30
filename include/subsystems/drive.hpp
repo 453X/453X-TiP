@@ -24,6 +24,7 @@ namespace auton
     void claw_open(bool b);
     void deploy_claw_open(bool b);
     void backLift_down();
+    void backLift_low();
     void backLift_up();
     void frontLift_up(bool up);
     void frontLift_up_higher(bool up);
@@ -50,7 +51,7 @@ namespace pid
 
     void drivePID(int units);
     void turnPID(double deg);
-    void distancePID(int units);
+    void distancePID(int , bool direction);
 
     void drivePIDwithClaw(int units);
 
