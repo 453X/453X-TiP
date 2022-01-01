@@ -234,7 +234,7 @@ namespace auton
         lift.tarePosition();
 
         // move and grab
-        pid::drivePID(1700);
+        pid::drivePID(1750);
 
         // drive::drive(1700, 600);
 
@@ -246,7 +246,7 @@ namespace auton
         pid::delaySeconds(0.5);
 
         // back
-        pid::drivePID(-1200);
+        pid::drivePID(-1100);
 
         // release yellow goal
         pid::turnPID(-90);
@@ -539,30 +539,62 @@ namespace pid
         int direction = abs(units) / units;
         double rotation = inertial.get();
         int power = 0;
+        int tune = 0;
         int setPoint = abs(units);
 
         double kP = 0.8;
         double kI = 0.01;
         double kD = 0.35;
 
-        double kP_angular = 100;
+        double kP_angular = 3.0;
+        bool turnRight;
 
         double errorSum = 0;
         int fr = 0;
         int fl = 0;
 
+        int initHeading = inertial.get();
+
         while (avgDriveEncoders() < abs(units))
         {
             double tolerance = 0.5;
             double error = setPoint - avgDriveEncoders();
-            double angularError;
-
-            int tune = 20;
+            double angularError = initHeading - inertial.get();
 
             if (error < 100)
                 errorSum += error;
             double prevError = 0;
             double derivative;
+
+            if (angularError > 0)
+            {
+                if (angularError > 180)
+                {
+                    // left
+                    angularError = 360 - angularError;
+                    turnRight = false;
+                }
+                else
+                {
+                    // right
+                    turnRight = true;
+                }
+            }
+            else
+            {
+                if (angularError < -180)
+                {
+                    // right
+                    angularError = 360 + angularError;
+                    turnRight = true;
+                }
+                else
+                {
+                    // left
+                    angularError = angularError * -1;
+                    turnRight = false;
+                }
+            }
 
             if (direction * (error * kP + derivative * kD + errorSum * kI) >= 500)
             {
@@ -573,12 +605,27 @@ namespace pid
                 power = direction * (error * kP + derivative * kD + errorSum * kI);
             }
 
+            if (turnRight)
+            {
+                tune = angularError * kP_angular;
+            }
+            else
+            {
+                tune = angularError * kP_angular * -1;
+            }
+
+            if (tune > 100)
+            {
+                tune = 100;
+            }
+
             // pros::lcd::print(0, "Get encoder  >> %f\n",
             // fabs(driveLF.get_position()));
             pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
             pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
             pros::lcd::print(2, "error   >> %5.2f", error);
             pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
+
             derivative = error - prevError;
             prevError = error;
 
@@ -587,23 +634,8 @@ namespace pid
             float rRate = 1.0f;
             float lRate = 1.0f;
 
-            if (inertial.get() > rotation + tolerance)
-            {
-                left.moveVelocity(power * lRate - tune);
-                right.moveVelocity(power * rRate + tune);
-                fl++;
-            }
-            else if (inertial.get() < rotation - tolerance)
-            {
-                left.moveVelocity(power * lRate + tune);
-                right.moveVelocity(power * rRate - tune);
-                fr++;
-            }
-            else
-            {
-                left.moveVelocity(power * lRate);
-                right.moveVelocity(power * rRate);
-            }
+            left.moveVelocity(power * lRate + tune);
+            right.moveVelocity(power * rRate - tune);
 
             pros::delay(10);
         }
@@ -714,10 +746,18 @@ namespace pid
     void distancePID(int setPoint, bool direction)
     {
         double kP = 5.0;
+        double kP_angular = 1.0;
+
+        int initHeading = inertial.get();
 
         double error;
+        double angularError;
+        double tune;
+
         double tol = 1.0;
         double power = 0;
+        
+        bool turnRight;
 
         double sDist = dist1.get() - setPoint;
 
@@ -728,15 +768,57 @@ namespace pid
             while (dist1.get() <= setPoint + tol)
             {
 
+                angularError = inertial.get() - initHeading;
+
+                if (angularError > 0)
+            {
+                if (angularError > 180)
+                {
+                    // left
+                    angularError = 360 - angularError;
+                    turnRight = false;
+                }
+                else
+                {
+                    // right
+                    turnRight = true;
+                }
+            }
+            else
+            {
+                if (angularError < -180)
+                {
+                    // right
+                    angularError = 360 + angularError;
+                    turnRight = true;
+                }
+                else
+                {
+                    // left
+                    angularError = angularError * -1;
+                    turnRight = false;
+                }
+            }
+
+            if (turnRight)
+            {
+                tune = angularError * kP_angular;
+            }
+            else
+            {
+                tune = angularError * kP_angular * -1;
+            }
+
                 if (!dist1.get() < 2400 && dist1.get() > 10)
                 {
                     error = 2400;
                 }
 
-                power = error * 600 / sDist * kP;
+                power = error * 500 / sDist * kP;
 
-                left.moveVelocity(power);
-                right.moveVelocity(power);
+                left.moveVelocity(power + tune);
+                right.moveVelocity(power - tune);
+
                 pros::lcd::print(1, "dist1 >> %5.2f", dist1.get());
                 pros::lcd::print(5, "TURN dist2 >> %5.2f", dist2.get());
             }
@@ -748,6 +830,48 @@ namespace pid
 
             while (dist2.get() <= setPoint + tol)
             {
+
+                angularError = inertial.get() - initHeading;
+
+                if (angularError > 0)
+            {
+                if (angularError > 180)
+                {
+                    // left
+                    angularError = 360 - angularError;
+                    turnRight = false;
+                }
+                else
+                {
+                    // right
+                    turnRight = true;
+                }
+            }
+            else
+            {
+                if (angularError < -180)
+                {
+                    // right
+                    angularError = 360 + angularError;
+                    turnRight = true;
+                }
+                else
+                {
+                    // left
+                    angularError = angularError * -1;
+                    turnRight = false;
+                }
+            }
+
+            if (turnRight)
+            {
+                tune = angularError * kP_angular;
+            }
+            else
+            {
+                tune = angularError * kP_angular * -1;
+            }
+
                 if (!dist2.get() < 2400 && dist2.get() > 10)
                 {
                     error = 2400;
