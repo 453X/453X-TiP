@@ -101,41 +101,6 @@ namespace drive
 
 }
 
-void driveTurnCorrection(int units, int power)
-{
-    pid::resetDriveEncoders();
-    int direction = abs(units) / units;
-    double rotation = inertial.get();
-    int setPoint = abs(units);
-
-    while (pid::avgDriveEncoders() < abs(units))
-    {
-        int tune = 30;
-        double tolerance = 3.0;
-
-        //===============================================
-
-        if (inertial.get() > rotation + tolerance)
-        {
-            left.moveVelocity(power - tune);
-            right.moveVelocity(power + tune);
-        }
-        else if (inertial.get() < rotation - tolerance)
-        {
-            left.moveVelocity(power + tune);
-            right.moveVelocity(power - tune);
-        }
-        else
-        {
-            left.moveVelocity(power);
-            right.moveVelocity(power);
-        }
-
-        pros::delay(10);
-    }
-    pid::stop(0);
-}
-
 namespace auton
 {
     void skills()
@@ -395,6 +360,21 @@ namespace auton
         }
     }
 
+    void claw_open(bool open, int power)
+    {
+        if (open)
+        {
+            int err = claw.moveAbsolute(0, power);
+            pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
+        }
+        else
+        {
+            int err = claw.moveAbsolute(800, power);
+            // int err = claw.moveVoltage(2000);
+            pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
+        }
+    }
+
     void backLift_down()
     {
         while (!frontLimit.isPressed())
@@ -522,7 +502,7 @@ namespace pid
         auton::claw_open(true);
         if (units > setpoint)
         {
-            drive::drive(units - setpoint, 600);
+            //pid::driveTurnAssist(units - setpoint, 600);
             auton::claw_open(false);
             drivePID(setpoint);
         }
@@ -613,6 +593,78 @@ namespace pid
             {
                 tune = angularError * kP_angular * -1;
             }
+
+            if (tune > 100)
+            {
+                tune = 100;
+            }
+
+            // pros::lcd::print(0, "Get encoder  >> %f\n",
+            // fabs(driveLF.get_position()));
+            pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
+            pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
+            pros::lcd::print(2, "error   >> %5.2f", error);
+            pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
+
+            derivative = error - prevError;
+            prevError = error;
+
+            //===============================================
+
+            float rRate = 1.0f;
+            float lRate = 1.0f;
+
+            left.moveVelocity(power * lRate + tune);
+            right.moveVelocity(power * rRate - tune);
+
+            pros::delay(10);
+        }
+        stop(0);
+    }
+
+    void drivePID(int maxPower, int units)
+    { // power in positive, units in positive or negative
+        resetDriveEncoders();
+        int direction = abs(units) / units;
+        double rotation = inertial.get();
+        int power = 0;
+        int tune = 0;
+        int setPoint = abs(units);
+
+        double kP = 0.8;
+        double kI = 0.01;
+        double kD = 0.35;
+
+        double kP_angular = 3.0;
+        bool turnRight;
+
+        double errorSum = 0;
+        int fr = 0;
+        int fl = 0;
+
+        int initHeading = inertial.get();
+
+        while (avgDriveEncoders() < abs(units))
+        {
+            double tolerance = 0.5;
+            double error = setPoint - avgDriveEncoders();
+            double angularError = initHeading - inertial.get();
+
+            if (error < 100)
+                errorSum += error;
+            double prevError = 0;
+            double derivative;
+
+            if (direction * (error * kP + derivative * kD + errorSum * kI) >= maxPower)
+            {
+                power = maxPower;
+            }
+            else
+            {
+                power = direction * (error * kP + derivative * kD + errorSum * kI);
+            }
+
+            tune = correctionDegrees(inertial.get(), initHeading);
 
             if (tune > 100)
             {
@@ -888,5 +940,89 @@ namespace pid
 
         stop();
     }
+
+}
+
+void driveTurnAssist(int units, int power)
+{
+    pid::resetDriveEncoders();
+
+    int direction = abs(units) / units;
+    double rotation = inertial.get();
+    int setPoint = abs(units);
+    
+    double initHeading = inertial.get();
+    double angularError;
+        
+    double kP_angular = 3.0;
+    int tune = 30;
+    double tolerance = 3.0;
+
+    while (pid::avgDriveEncoders() < abs(units))
+    {
+        
+        angularError = pid::correctionDegrees(inertial.get(), initHeading);
+
+        //===============================================
+
+            tune = angularError * kP_angular;
+
+            if(tune > 100)
+            {
+                tune = 100;
+            }
+        
+            left.moveVelocity(power + tune);
+            right.moveVelocity(power - tune);
+           
+
+        pros::delay(10);
+    }
+    pid::stop(0);
+}
+
+double correctionDegrees(double heading, double setPoint)
+{
+    double angularError = heading - setPoint;
+    bool turnRight;
+
+    if (angularError > 0)
+            {
+                if (angularError > 180)
+                {
+                    // left
+                    angularError = 360 - angularError;
+                    turnRight = false;
+                }
+                else
+                {
+                    // right
+                    turnRight = true;
+                }
+            }
+            else
+            {
+                if (angularError < -180)
+                {
+                    // right
+                    angularError = 360 + angularError;
+                    turnRight = true;
+                }
+                else
+                {
+                    // left
+                    angularError = angularError * -1;
+                    turnRight = false;
+                }
+            }
+
+            if(turnRight)
+            {
+                return angularError;
+            }
+            else
+            {
+                return angularError * -1;
+            }
 
 }

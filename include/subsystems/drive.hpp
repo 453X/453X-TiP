@@ -9,6 +9,7 @@ namespace drive
     void drive(int degrees, int power);
     void turn(double power);
     void turn(double degrees, int power);
+
 }
 
 namespace auton
@@ -22,6 +23,7 @@ namespace auton
     void leftRing();
 
     void claw_open(bool b);
+    void claw_open(bool b, double d);
     void deploy_claw_open(bool b);
     void backLift_down();
     void backLift_low();
@@ -53,6 +55,9 @@ namespace pid
     void turnPID(double deg);
     void distancePID(int , bool direction);
 
+    double correctionDegrees(double heading, double setPoint);
+
     void drivePIDwithClaw(int units);
+    void driveTurnAssist(int units, int power);
 
 }
