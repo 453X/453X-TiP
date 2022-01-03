@@ -114,29 +114,37 @@ namespace auton
 
         backLift_down();
         pid::delaySeconds(0.8);
-        drive::drive(400, -300);
+        pid::drivePID(-400);
         backLift_low();
         pid::delaySeconds(2);
+        pid::turnPID(0);
+        pid::delaySeconds(0.5);
 
-        pid::distancePID(1000, false);
-        pid::delaySeconds(100);
+        // pid::distancePID(1000, false);
+        pid::drivePID(-3100);
+        // pid::delaySeconds(100);
 
-        drive::drive(3500, -300);
+        // drive::drive(3500, -300);
         // pid::drivePID(-3500);
 
         pid::delaySeconds(0.3);
+
+        backLift_down();
+        pid::delaySeconds(0.5);
         // pid::turnPID(27);
-        pid::turnPID(34);
-        pid::drivePID(1150);
+        pid::turnPID(30);
+        pid::drivePID(1300);
+        pid::drivePID(200, 300);
         claw_open(false);
-        pid::delaySeconds(1.0);
+        pid::delaySeconds(1.2);
         frontLift_up_higher(true);
         pid::turnPID(37);
-        pid::drivePID(2600);
+        pid::drivePID(2100);
         pid::delaySeconds(0.5);
         pid::turnPID(10);
         // frontLift_up(false);
         pid::delaySeconds(0.5);
+        pid::drivePID(100, 100);
         auton::claw_open(true);
         // backLift_down();
 
@@ -580,6 +588,10 @@ namespace pid
             {
                 power = 500;
             }
+            else if(direction * (error * kP + derivative * kD + errorSum * kI) <= -500)
+            {
+                power = -500;
+            }
             else
             {
                 power = direction * (error * kP + derivative * kD + errorSum * kI);
@@ -598,6 +610,10 @@ namespace pid
             {
                 tune = 100;
             }
+            else if (tune < -100)
+            {
+                tune = -100;
+            }
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
             // fabs(driveLF.get_position()));
@@ -605,6 +621,7 @@ namespace pid
             pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
             pros::lcd::print(2, "error   >> %5.2f", error);
             pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
+            pros::lcd::print(4, "tune >> %3d", tune);
 
             derivative = error - prevError;
             prevError = error;
@@ -655,6 +672,36 @@ namespace pid
             double prevError = 0;
             double derivative;
 
+            if (angularError > 0)
+            {
+                if (angularError > 180)
+                {
+                    // left
+                    angularError = 360 - angularError;
+                    turnRight = false;
+                }
+                else
+                {
+                    // right
+                    turnRight = true;
+                }
+            }
+            else
+            {
+                if (angularError < -180)
+                {
+                    // right
+                    angularError = 360 + angularError;
+                    turnRight = true;
+                }
+                else
+                {
+                    // left
+                    angularError = angularError * -1;
+                    turnRight = false;
+                }
+            }
+
             if (direction * (error * kP + derivative * kD + errorSum * kI) >= maxPower)
             {
                 power = maxPower;
@@ -664,7 +711,14 @@ namespace pid
                 power = direction * (error * kP + derivative * kD + errorSum * kI);
             }
 
-            tune = correctionDegrees(inertial.get(), initHeading);
+            if (turnRight)
+            {
+                tune = angularError * kP_angular;
+            }
+            else
+            {
+                tune = angularError * kP_angular * -1;
+            }
 
             if (tune > 100)
             {

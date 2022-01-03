@@ -52,6 +52,7 @@ namespace pid
     void stop(double seconds);
 
     void drivePID(int units);
+    void drivePID(int maxPower, int units);
     void turnPID(double deg);
     void distancePID(int , bool direction);
 
