@@ -136,39 +136,62 @@ namespace auton
         pid::drivePID(1300);
         pid::drivePID(200, 300);
         claw_open(false);
-        pid::delaySeconds(1.2);
+        pid::delaySeconds(2.0);
         frontLift_up_higher(true);
         pid::turnPID(37);
         pid::drivePID(2100);
         pid::delaySeconds(0.5);
-        pid::turnPID(10);
+        pid::turnPID(0);
         // frontLift_up(false);
         pid::delaySeconds(0.5);
-        pid::drivePID(100, 100);
+        pid::drivePID(200, 150);
         auton::claw_open(true);
         // backLift_down();
 
         pid::delaySeconds(0.5);
         pid::turnPID(0);
+
+        //back up to tall neutral goal
+
         pid::drivePID(-1300);
         pid::delaySeconds(0.3);
         pid::turnPID(-40);
-        pid::drivePID(-1700);
+        // backLift_low();
+
+        //push tall goal to red home zone
+        // pid::distancePID(800, false);
+        pid::drivePID(-2800);
+        pid::delaySeconds(0.5);
+
         frontLift_down();
+        backLift_down();
         pid::delaySeconds(0.3);
-        pid::turnPID(100);
+        pid::drivePID(600);
+        pid::turnPID(90);
         pid::delaySeconds(0.2);
-        pid::drivePID(1100);
+        
+        // pid::drivePID(1100);
+        pid::distancePID(600, true);
+
         auton::claw_open(false);
-        pid::delaySeconds(1.1);
+        pid::delaySeconds(1.3);
+
+        pid::turnPID(100);
+        pid::delaySeconds(5);
         pid::drivePID(-1600);
         pid::turnPID(225);
-        pid::drivePID(-2500);
-        pid::drivePID(1000);
+        pid::drivePID(-2800);
+        pid::drivePID(500);
+
+        pid::delaySeconds(5);
         pid::turnPID(270);
-        pid::drivePID(1000);
+        pid::delaySeconds(3);
+        frontLift_up(true);
+        pid::drivePID(1500);
         pid::turnPID(0);
-        drive::drive(120, 100);
+        // drive::drive(120, 100);
+
+        pid::drivePID(1500);
         claw_open(true);
     }
 
@@ -212,7 +235,7 @@ namespace auton
         // drive::drive(1700, 600);
 
         claw_open(false);
-        pid::delaySeconds(1.4);
+        pid::delaySeconds(1.5);
 
         // lift yellow goal
         frontLift_up(true);
@@ -372,7 +395,7 @@ namespace auton
     {
         if (open)
         {
-            int err = claw.moveAbsolute(0, power);
+            int err = claw.moveAbsolute(200, power);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else
@@ -769,6 +792,9 @@ namespace pid
             }
             bool turnRight = false;
             double error = deg - heading;
+            while(error>360){
+                error-=360;
+            }
             pros::lcd::print(0, "heading  >> %5.2f", heading);
             pros::lcd::print(1, "target   >> %5.2f", deg);
             pros::lcd::print(2, "orignal error  >> %5.2f", error);
@@ -871,51 +897,51 @@ namespace pid
         {
             error = dist1.get() - setPoint;
 
-            while (dist1.get() <= setPoint + tol)
+            while (dist1.get() >setPoint + tol)
             {
 
                 angularError = inertial.get() - initHeading;
 
                 if (angularError > 0)
-            {
-                if (angularError > 180)
                 {
-                    // left
-                    angularError = 360 - angularError;
-                    turnRight = false;
+                    if (angularError > 180)
+                    {
+                        // left
+                        angularError = 360 - angularError;
+                        turnRight = false;
+                    }
+                    else
+                    {
+                        // right
+                        turnRight = true;
+                    }
                 }
                 else
                 {
-                    // right
-                    turnRight = true;
+                    if (angularError < -180)
+                    {
+                        // right
+                        angularError = 360 + angularError;
+                        turnRight = true;
+                    }
+                    else
+                    {
+                        // left
+                        angularError = angularError * -1;
+                        turnRight = false;
+                    }
                 }
-            }
-            else
-            {
-                if (angularError < -180)
+
+                if (turnRight)
                 {
-                    // right
-                    angularError = 360 + angularError;
-                    turnRight = true;
+                    tune = angularError * kP_angular;
                 }
                 else
                 {
-                    // left
-                    angularError = angularError * -1;
-                    turnRight = false;
+                    tune = angularError * kP_angular * -1;
                 }
-            }
 
-            if (turnRight)
-            {
-                tune = angularError * kP_angular;
-            }
-            else
-            {
-                tune = angularError * kP_angular * -1;
-            }
-
-                if (!dist1.get() < 2400 && dist1.get() > 10)
+                if (!(dist1.get()<=2400 && dist1.get() > 10))
                 {
                     error = 2400;
                 }
@@ -934,7 +960,7 @@ namespace pid
             error = dist2.get() - setPoint;
             double dist = dist2.get();
 
-            while (dist2.get() <= setPoint + tol)
+            while (dist2.get() > setPoint + tol)
             {
 
                 angularError = inertial.get() - initHeading;
@@ -969,16 +995,16 @@ namespace pid
                 }
             }
 
-            if (turnRight)
-            {
-                tune = angularError * kP_angular;
-            }
-            else
-            {
-                tune = angularError * kP_angular * -1;
-            }
+                if (turnRight)
+                {
+                    tune = angularError * kP_angular;
+                }
+                else
+                {
+                    tune = angularError * kP_angular * -1;
+                }
 
-                if (!dist2.get() < 2400 && dist2.get() > 10)
+                if (!(dist2.get()<2400&& dist2.get()>10))
                 {
                     error = 2400;
                 }
