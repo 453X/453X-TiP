@@ -12,7 +12,7 @@ ADIEncoder leftEncoder('A', 'B', true);
 ADIEncoder rightEncoder('C', 'D', false);
 
 IMU inertial(11);
-DistanceSensor dist1(12);
+DistanceSensor dist1(14);
 DistanceSensor dist2(13);
 
 Timer timer;
@@ -112,6 +112,13 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
+        // pid::turnPID(90);
+        // pid::delaySeconds(3);
+        // pid::turnPID(0);
+        // pid::delaySeconds(3);
+        // pid::turnPID(90);
+        // pid::delaySeconds(20);
+        
         backLift_down();
         pid::delaySeconds(0.8);
         pid::drivePID(-400);
@@ -179,20 +186,22 @@ namespace auton
         pid::turnPID(100);
         pid::delaySeconds(5);
         pid::drivePID(-1600);
-        pid::turnPID(225);
+        pid::turnPID(210);
         pid::drivePID(-2800);
         pid::drivePID(500);
 
         pid::delaySeconds(5);
         pid::turnPID(270);
         pid::delaySeconds(3);
-        frontLift_up(true);
-        pid::drivePID(1500);
+        frontLift_up_higher(true);
+        pid::drivePID(2200);
         pid::turnPID(0);
         // drive::drive(120, 100);
 
-        pid::drivePID(1500);
+        pid::drivePID(1100);
         claw_open(true);
+
+
     }
 
     void leftRing()
@@ -380,12 +389,12 @@ namespace auton
     {
         if (open)
         {
-            int err = claw.moveAbsolute(0, 100);
+            int err = claw.moveAbsolute(200, 100);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else
         {
-            int err = claw.moveAbsolute(800, 100);
+            int err = claw.moveAbsolute(900, 100);
             // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
@@ -440,7 +449,7 @@ namespace auton
 
     void frontLift_up_higher(bool up)
     {
-        int pos = 2500;
+        int pos = 2600;
         if (up)
         {
             lift.moveAbsolute(pos, 127);
