@@ -120,23 +120,27 @@ namespace auton
         // pid::delaySeconds(20);
         
         backLift_down();
-        pid::delaySeconds(0.8);
-        pid::drivePID(-400);
-        backLift_low();
-        pid::delaySeconds(2);
-        pid::turnPID(0);
         pid::delaySeconds(0.5);
+        pid::drivePID(-500);
+        backLift_low();
+        pid::turnPID(0);
+        pid::delaySeconds(2.0);
 
         // pid::distancePID(1000, false);
-        pid::drivePID(-3100);
+        pid::drivePID(-3500);
         // pid::delaySeconds(100);
 
         // drive::drive(3500, -300);
         // pid::drivePID(-3500);
 
+        // release blue goal
+        backLift_down();
+
         pid::delaySeconds(0.3);
 
-        backLift_down();
+        pid::drivePID(300);
+
+        
         pid::delaySeconds(0.5);
         // pid::turnPID(27);
         pid::turnPID(30);
@@ -146,12 +150,15 @@ namespace auton
         pid::delaySeconds(2.0);
         frontLift_up_higher(true);
         pid::turnPID(37);
-        pid::drivePID(2100);
+        pid::drivePID(2000);
         pid::delaySeconds(0.5);
+
+        // balance the platform
         pid::turnPID(0);
         // frontLift_up(false);
         pid::delaySeconds(0.5);
         pid::drivePID(200, 150);
+        pid::delaySeconds(0.5);
         auton::claw_open(true);
         // backLift_down();
 
@@ -174,6 +181,8 @@ namespace auton
         backLift_down();
         pid::delaySeconds(0.3);
         pid::drivePID(600);
+
+        // face red goal on blue home zone
         pid::turnPID(90);
         pid::delaySeconds(0.2);
         
@@ -183,23 +192,63 @@ namespace auton
         auton::claw_open(false);
         pid::delaySeconds(1.3);
 
+
         pid::turnPID(100);
-        pid::delaySeconds(5);
+        pid::delaySeconds(0.4);
         pid::drivePID(-1600);
+        // turn torwards left neutral to push
         pid::turnPID(210);
         pid::drivePID(-2800);
         pid::drivePID(500);
 
-        pid::delaySeconds(5);
+        pid::delaySeconds(0.5);
         pid::turnPID(270);
-        pid::delaySeconds(3);
+        pid::delaySeconds(0.4);
         frontLift_up_higher(true);
         pid::drivePID(2200);
         pid::turnPID(0);
         // drive::drive(120, 100);
 
-        pid::drivePID(1100);
+        pid::drivePID(1050);
+
+        // release red goal on platform
         claw_open(true);
+        pid::delaySeconds(0.5);
+
+        //
+        frontLift_down();
+        backLift_up();
+
+        pid::drivePID(-400);
+        pid::delaySeconds(0.2);
+        pid::turnPID(90);
+        pid::delaySeconds(0.2);
+        pid::distancePID(500, true);
+
+        // turn to blue mogo on red side
+        pid::turnPID(-70);
+        pid::drivePID(1200);
+        claw_open(false);
+        pid::delaySeconds(1.0);
+        frontLift_up(true);
+        pid::drivePID(-200, 300);
+
+        pid::turnPID(202);
+        pid::delaySeconds(0.3);
+        frontLift_up_higher(true);
+        pid::drivePID(3800);
+        claw_open(true);
+        pid::delaySeconds(0.3);
+        pid::drivePID(-200);
+        pid::turnPID(90);
+        pid::delaySeconds(0.3);
+        pid::distancePID(500, false);
+
+
+
+
+
+
 
 
     }
@@ -887,7 +936,7 @@ namespace pid
     void distancePID(int setPoint, bool direction)
     {
         double kP = 5.0;
-        double kP_angular = 1.0;
+        double kP_angular = 10.0;
 
         int initHeading = inertial.get();
 
