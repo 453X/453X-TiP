@@ -111,7 +111,7 @@ namespace auton
         pid::resetDriveEncoders();
         claw.tarePosition();
         lift.tarePosition();
-
+/*
         // pid::turnPID(90);
         // pid::delaySeconds(3);
         // pid::turnPID(0);
@@ -119,15 +119,16 @@ namespace auton
         // pid::turnPID(90);
         // pid::delaySeconds(20);
         
+        // backLift_down();
+        // pid::delaySeconds(0.5);
+        // pid::drivePID(-500);
         backLift_down();
-        pid::delaySeconds(0.5);
-        pid::drivePID(-500);
-        backLift_low();
-        pid::turnPID(0);
-        pid::delaySeconds(2.0);
+        // pid::turnPID(0);
+        pid::delaySeconds(1.0);
+        //  pid::delaySeconds(2.0);
 
         // pid::distancePID(1000, false);
-        pid::drivePID(-3500);
+        pid::drivePID(-4000);
         // pid::delaySeconds(100);
 
         // drive::drive(3500, -300);
@@ -143,7 +144,7 @@ namespace auton
         
         pid::delaySeconds(0.5);
         // pid::turnPID(27);
-        pid::turnPID(30);
+        pid::turnPID(35);
         pid::drivePID(1300);
         pid::drivePID(200, 300);
         claw_open(false);
@@ -157,17 +158,18 @@ namespace auton
         pid::turnPID(0);
         // frontLift_up(false);
         pid::delaySeconds(0.5);
-        pid::drivePID(200, 150);
+        pid::drivePID(200, 100);
+        drive::drive(200);
         pid::delaySeconds(0.5);
         auton::claw_open(true);
         // backLift_down();
-
+*/
         pid::delaySeconds(0.5);
         pid::turnPID(0);
 
         //back up to tall neutral goal
-
-        pid::drivePID(-1300);
+        // druvePID 50 was taken off
+        pid::drivePID(-1250);
         pid::delaySeconds(0.3);
         pid::turnPID(-40);
         // backLift_low();
@@ -195,21 +197,25 @@ namespace auton
 
         pid::turnPID(100);
         pid::delaySeconds(0.4);
-        pid::drivePID(-1600);
+        pid::drivePID(-1500);
         // turn torwards left neutral to push
-        pid::turnPID(210);
+        pid::turnPID(205);
         pid::drivePID(-2800);
+        backLift_up();
+        pid::delaySeconds(0.5);
         pid::drivePID(500);
 
         pid::delaySeconds(0.5);
         pid::turnPID(270);
         pid::delaySeconds(0.4);
         frontLift_up_higher(true);
-        pid::drivePID(2200);
+        pid::drivePID(2000);
         pid::turnPID(0);
         // drive::drive(120, 100);
 
-        pid::drivePID(1050);
+        pid::drivePID(550);
+        drive::drive(400);
+        pid::delaySeconds(0.4);
 
         // release red goal on platform
         claw_open(true);
@@ -217,26 +223,31 @@ namespace auton
 
         //
         frontLift_down();
-        backLift_up();
+        
 
-        pid::drivePID(-400);
+        pid::drivePID(-200);
         pid::delaySeconds(0.2);
         pid::turnPID(90);
         pid::delaySeconds(0.2);
+        backLift_down();
         pid::distancePID(500, true);
 
+        //
+        pid::turnPID(0);
+        pid::distancePID(700, true);
+
         // turn to blue mogo on red side
-        pid::turnPID(-70);
-        pid::drivePID(1200);
+        pid::turnPID(-50);
+        pid::drivePID(750);
         claw_open(false);
         pid::delaySeconds(1.0);
         frontLift_up(true);
         pid::drivePID(-200, 300);
 
-        pid::turnPID(202);
+        pid::turnPID(205);
         pid::delaySeconds(0.3);
         frontLift_up_higher(true);
-        pid::drivePID(3800);
+        pid::drivePID(4000);
         claw_open(true);
         pid::delaySeconds(0.3);
         pid::drivePID(-200);
@@ -615,7 +626,7 @@ namespace pid
         double kI = 0.01;
         double kD = 0.35;
 
-        double kP_angular = 3.0;
+        double kP_angular = 4.0;
         bool turnRight;
 
         double errorSum = 0;
@@ -935,8 +946,8 @@ namespace pid
 
     void distancePID(int setPoint, bool direction)
     {
-        double kP = 5.0;
-        double kP_angular = 10.0;
+        double kP = 50.0;
+        double kP_angular = 3.0;
 
         int initHeading = inertial.get();
 
@@ -958,7 +969,7 @@ namespace pid
             while (dist1.get() >setPoint + tol)
             {
 
-                angularError = inertial.get() - initHeading;
+                angularError = initHeading - inertial.get();
 
                 if (angularError > 0)
                 {
@@ -1006,11 +1017,21 @@ namespace pid
 
                 power = error * 500 / sDist * kP;
 
+                if(power > 500)
+                {
+                    power = 500;
+                }
+
                 left.moveVelocity(power + tune);
                 right.moveVelocity(power - tune);
 
-                pros::lcd::print(1, "dist1 >> %5.2f", dist1.get());
-                pros::lcd::print(5, "TURN dist2 >> %5.2f", dist2.get());
+                pros::lcd::print(5, "dist1 >> %5.2f", dist1.get());
+                pros::lcd::print(6, "TURN dist2 >> %5.2f", dist2.get());
+
+                pros::lcd::print(0, "rotation  >> %5.2f", inertial.get());
+                pros::lcd::print(1, "encoder value  >> %5.2f", avgDriveEncoders());
+                pros::lcd::print(2, "error   >> %5.2f", error);
+                pros::lcd::print(4, "tune >> %3d", tune);
             }
         }
         else
