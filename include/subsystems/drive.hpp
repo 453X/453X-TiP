@@ -24,7 +24,6 @@ namespace auton
 
     void claw_open(bool b);
     void claw_open(bool b, double d);
-    void deploy_claw_open(bool b);
     void backLift_down();
     void backLift_low();
     void backLift_up();

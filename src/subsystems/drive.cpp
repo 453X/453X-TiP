@@ -118,7 +118,7 @@ namespace auton
         // pid::delaySeconds(3);
         // pid::turnPID(90);
         // pid::delaySeconds(20);
-        
+
         // backLift_down();
         // pid::delaySeconds(0.5);
         // pid::drivePID(-500);
@@ -141,7 +141,6 @@ namespace auton
 
         pid::drivePID(300);
 
-        
         pid::delaySeconds(0.5);
         // pid::turnPID(27);
         pid::turnPID(35);
@@ -158,12 +157,14 @@ namespace auton
         pid::turnPID(0);
         // frontLift_up(false);
         pid::delaySeconds(0.5);
-        pid::drivePID(200, 100);
-        drive::drive(200);
-        pid::delaySeconds(0.5);
+        pid::drivePID(500, 100);
+        drive::drive(500);
+        pid::delaySeconds(0.3);
         auton::claw_open(true);
         // backLift_down();
 */
+
+
         pid::delaySeconds(0.5);
         pid::turnPID(0);
 
@@ -200,10 +201,10 @@ namespace auton
         pid::drivePID(-1500);
         // turn torwards left neutral to push
         pid::turnPID(205);
-        pid::drivePID(-2800);
+        pid::drivePID(-2600);
         backLift_up();
         pid::delaySeconds(0.5);
-        pid::drivePID(500);
+        pid::drivePID(300);
 
         pid::delaySeconds(0.5);
         pid::turnPID(270);
@@ -226,6 +227,8 @@ namespace auton
         
 
         pid::drivePID(-200);
+
+        
         pid::delaySeconds(0.2);
         pid::turnPID(90);
         pid::delaySeconds(0.2);
@@ -237,8 +240,8 @@ namespace auton
         pid::distancePID(700, true);
 
         // turn to blue mogo on red side
-        pid::turnPID(-50);
-        pid::drivePID(750);
+        pid::turnPID(-55);
+        pid::drivePID(350, 755);
         claw_open(false);
         pid::delaySeconds(1.0);
         frontLift_up(true);
@@ -247,7 +250,9 @@ namespace auton
         pid::turnPID(205);
         pid::delaySeconds(0.3);
         frontLift_up_higher(true);
-        pid::drivePID(4000);
+        pid::drivePID(4200);
+        drive::drive(500);
+        pid::delaySeconds(0.3);
         claw_open(true);
         pid::delaySeconds(0.3);
         pid::drivePID(-200);
@@ -256,13 +261,13 @@ namespace auton
         pid::distancePID(500, false);
 
 
-
-
-
-
-
-
     }
+
+
+
+
+
+
 
     void leftRing()
     {
@@ -343,6 +348,11 @@ namespace auton
         pid::stop();
     }
 
+
+
+
+
+
     void leftGoal()
     {
         pros::lcd::initialize();
@@ -369,6 +379,10 @@ namespace auton
         claw_open(true);
         pid::delaySeconds(0.1);
     }
+
+
+
+
 
     void redRight()
     {
@@ -411,6 +425,9 @@ namespace auton
         pid::stop();
     }
 
+
+
+
     void redRight2()
     {
         pros::lcd::initialize();
@@ -426,30 +443,11 @@ namespace auton
         pid::drivePID(-800);
     }
 
-    void redBack()
-    {
-    }
-
-    void deploy_claw_open(bool open)
-    {
-        if (open)
-        {
-            int err = claw.moveAbsolute(0, 100);
-            pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
-        }
-        else
-        {
-            int err = claw.moveAbsolute(300, 100);
-            // int err = claw.moveVoltage(2000);
-            pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
-        }
-    }
-
     void claw_open(bool open)
     {
         if (open)
         {
-            int err = claw.moveAbsolute(200, 100);
+            int err = claw.moveAbsolute(300, 100);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else
@@ -464,7 +462,7 @@ namespace auton
     {
         if (open)
         {
-            int err = claw.moveAbsolute(200, power);
+            int err = claw.moveAbsolute(300, power);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else
@@ -744,7 +742,7 @@ namespace pid
         double kI = 0.01;
         double kD = 0.35;
 
-        double kP_angular = 3.0;
+        double kP_angular = 4.0;
         bool turnRight;
 
         double errorSum = 0;
