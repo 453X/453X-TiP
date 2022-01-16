@@ -111,7 +111,7 @@ namespace auton
         pid::resetDriveEncoders();
         claw.tarePosition();
         lift.tarePosition();
-/*
+
         // pid::turnPID(90);
         // pid::delaySeconds(3);
         // pid::turnPID(0);
@@ -128,6 +128,7 @@ namespace auton
         //  pid::delaySeconds(2.0);
 
         // pid::distancePID(1000, false);
+        backLift_low();
         pid::drivePID(-4000);
         // pid::delaySeconds(100);
 
@@ -141,6 +142,15 @@ namespace auton
 
         pid::drivePID(300);
 
+
+        pid::turnPID(-45);
+        pid::drivePID(-1200);
+
+        backLift_up();
+
+        pid::delaySeconds(1.0);
+
+        pid::drivePID(1200);
         pid::delaySeconds(0.5);
         // pid::turnPID(27);
         pid::turnPID(35);
@@ -162,7 +172,7 @@ namespace auton
         pid::delaySeconds(0.3);
         auton::claw_open(true);
         // backLift_down();
-*/
+
 
 
         pid::delaySeconds(0.5);
@@ -247,7 +257,7 @@ namespace auton
         frontLift_up(true);
         pid::drivePID(-200, 300);
 
-        pid::turnPID(205);
+        pid::turnPID(207);
         pid::delaySeconds(0.3);
         frontLift_up_higher(true);
         pid::drivePID(4200);
@@ -624,7 +634,7 @@ namespace pid
         double kI = 0.01;
         double kD = 0.35;
 
-        double kP_angular = 4.0;
+        double kP_angular = 7.0;
         bool turnRight;
 
         double errorSum = 0;
