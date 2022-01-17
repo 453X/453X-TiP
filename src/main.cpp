@@ -70,8 +70,7 @@ void autonomous()
 
         else if (selector::auton == 1)
         { // run auton for Front Red
-            // auton::rightOneGoal();
-            auton::skills();
+            auton::rightOneGoal();
         }
 
         else if (selector::auton == 2)
@@ -82,7 +81,7 @@ void autonomous()
 
         else if (selector::auton == 3)
         {
-            auton::leftGoal();
+            auton::singleAWP();
         }
 
         else if (selector::auton == -1)

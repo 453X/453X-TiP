@@ -21,6 +21,7 @@ namespace auton
     void rightOneGoal();
     void leftGoal();
     void leftRing();
+    void singleAWP();
 
     void claw_open(bool b);
     void claw_open(bool b, double d);

@@ -5,7 +5,7 @@
 //selector configuration
 #define HUE 46
 #define DEFAULT 1
-#define AUTONS "Right One Goal", "Left Ring", "Nothing"
+#define AUTONS "Right One Goal", "Left Ring", "Single AWP"
 
 namespace selector {
 
