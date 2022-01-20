@@ -10,6 +10,8 @@ namespace rollers
         roller.setBrakeMode(AbstractMotor::brakeMode::coast);
     }
 
+    
+
     void opcontrol()
     {
         Controller master;

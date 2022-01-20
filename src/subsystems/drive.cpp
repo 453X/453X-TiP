@@ -5,8 +5,8 @@ Motor LF(-1), LB(-2), RF(3), RB(4), liftBack(5), roller(-6), lift(7), claw(-8);
 ADIButton frontLimit('G');
 ADIButton backLimit('H');
 
-MotorGroup left({LF, LB});
-MotorGroup right({RF, RB});
+MotorGroup left({ LF, LB });
+MotorGroup right({ RF, RB });
 
 ADIEncoder leftEncoder('A', 'B', true);
 ADIEncoder rightEncoder('C', 'D', false);
@@ -21,20 +21,20 @@ bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
-                     //  .withMotors(-1,3)
-                     .withMotors(
-                         {-1, -2}, // Left motors are 1 & 2
-                         {3, 4})   // Right motors are 3 & 4
+//  .withMotors(-1,3)
+.withMotors(
+    { -1, -2 }, // Left motors are 1 & 2
+    { 3, 4 })   // Right motors are 3 & 4
 
-                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+// Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+.withDimensions({ AbstractMotor::gearset::blue, (84.0 / 36.0) }, { {4_in, 35.4_cm}, imev5BlueTPR })
 
-                     // track        = distance between the center of the 2 tracking wheels
-                     // wheel track  = distance between the center of the 2 wheels on either side
+// track        = distance between the center of the 2 tracking wheels
+// wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder)
-                     .build();
+.withSensors(leftEncoder, rightEncoder)
+.build();
 
 namespace drive
 {
@@ -68,7 +68,7 @@ namespace drive
 
         // Arcade drive with the left stick.
         driveOdom->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-                                      master.getAnalog(ControllerAnalog::leftX));
+            master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -145,12 +145,12 @@ namespace auton
         pid::drivePID(290);
 
 
-        pid::turnPID(-45);
+        pid::turnPID(-48);
         pid::drivePID(-1300);
 
         backLift_up();
 
-        pid::delaySeconds(0.3);
+        pid::delaySeconds(0.6);
 
 
         pid::drivePID(1200);
@@ -179,6 +179,8 @@ namespace auton
         drive::drive(450);
         roller_off();
         pid::delaySeconds(0.8);
+        pid::turnPID(-25);
+        pid::delaySeconds(0.2);
         frontLift_up(true);
         auton::claw_open(true);
 
@@ -210,7 +212,7 @@ namespace auton
         // face red goal on blue home zone
         pid::turnPID(90);
         pid::delaySeconds(0.2);
-        
+
         // pid::drivePID(1100);
         pid::distancePID(600, true);
 
@@ -249,11 +251,11 @@ namespace auton
         //
         frontLift_down();
         roller_off();
-        
+
 
         pid::drivePID(-200);
 
-        
+
         pid::delaySeconds(0.2);
         pid::turnPID(90);
         // pid::delaySeconds(0.2);
@@ -289,7 +291,7 @@ namespace auton
 
 
     }
-    
+
     void singleAWP()
     {
         pros::lcd::initialize();
@@ -302,7 +304,7 @@ namespace auton
         pid::delaySeconds(1.0);
         backLift_up();
 
-        pid::delaySeconds(1.0); 
+        pid::delaySeconds(1.0);
         frontLift_up(true);
         roller_on();
 
@@ -734,7 +736,7 @@ namespace pid
             {
                 power = 500;
             }
-            else if(direction * (error * kP + derivative * kD + errorSum * kI) <= -500)
+            else if (direction * (error * kP + derivative * kD + errorSum * kI) <= -500)
             {
                 power = -500;
             }
@@ -915,8 +917,8 @@ namespace pid
             }
             bool turnRight = false;
             double error = deg - heading;
-            while(error>360){
-                error-=360;
+            while (error > 360) {
+                error -= 360;
             }
             pros::lcd::print(0, "heading  >> %5.2f", heading);
             pros::lcd::print(1, "target   >> %5.2f", deg);
@@ -1011,7 +1013,7 @@ namespace pid
 
         double tol = 1.0;
         double power = 0;
-        
+
         bool turnRight;
 
         double sDist = dist1.get() - setPoint;
@@ -1020,7 +1022,7 @@ namespace pid
         {
             error = dist1.get() - setPoint;
 
-            while (dist1.get() >setPoint + tol)
+            while (dist1.get() > setPoint + tol)
             {
 
                 angularError = initHeading - inertial.get();
@@ -1064,14 +1066,14 @@ namespace pid
                     tune = angularError * kP_angular * -1;
                 }
 
-                if (!(dist1.get()<=2400 && dist1.get() > 10))
+                if (!(dist1.get() <= 2400 && dist1.get() > 10))
                 {
                     error = 2400;
                 }
 
                 power = error * 500 / sDist * kP;
 
-                if(power > 500)
+                if (power > 500)
                 {
                     power = 500;
                 }
@@ -1099,34 +1101,34 @@ namespace pid
                 angularError = inertial.get() - initHeading;
 
                 if (angularError > 0)
-            {
-                if (angularError > 180)
                 {
-                    // left
-                    angularError = 360 - angularError;
-                    turnRight = false;
+                    if (angularError > 180)
+                    {
+                        // left
+                        angularError = 360 - angularError;
+                        turnRight = false;
+                    }
+                    else
+                    {
+                        // right
+                        turnRight = true;
+                    }
                 }
                 else
                 {
-                    // right
-                    turnRight = true;
+                    if (angularError < -180)
+                    {
+                        // right
+                        angularError = 360 + angularError;
+                        turnRight = true;
+                    }
+                    else
+                    {
+                        // left
+                        angularError = angularError * -1;
+                        turnRight = false;
+                    }
                 }
-            }
-            else
-            {
-                if (angularError < -180)
-                {
-                    // right
-                    angularError = 360 + angularError;
-                    turnRight = true;
-                }
-                else
-                {
-                    // left
-                    angularError = angularError * -1;
-                    turnRight = false;
-                }
-            }
 
                 if (turnRight)
                 {
@@ -1137,7 +1139,7 @@ namespace pid
                     tune = angularError * kP_angular * -1;
                 }
 
-                if (!(dist2.get()<2400&& dist2.get()>10))
+                if (!(dist2.get() < 2400 && dist2.get() > 10))
                 {
                     error = 2400;
                 }
@@ -1163,31 +1165,31 @@ void driveTurnAssist(int units, int power)
     int direction = abs(units) / units;
     double rotation = inertial.get();
     int setPoint = abs(units);
-    
+
     double initHeading = inertial.get();
     double angularError;
-        
+
     double kP_angular = 3.0;
     int tune = 30;
     double tolerance = 3.0;
 
     while (pid::avgDriveEncoders() < abs(units))
     {
-        
+
         angularError = pid::correctionDegrees(inertial.get(), initHeading);
 
         //===============================================
 
-            tune = angularError * kP_angular;
+        tune = angularError * kP_angular;
 
-            if(tune > 100)
-            {
-                tune = 100;
-            }
-        
-            left.moveVelocity(power + tune);
-            right.moveVelocity(power - tune);
-           
+        if (tune > 100)
+        {
+            tune = 100;
+        }
+
+        left.moveVelocity(power + tune);
+        right.moveVelocity(power - tune);
+
 
         pros::delay(10);
     }
@@ -1200,42 +1202,42 @@ double correctionDegrees(double heading, double setPoint)
     bool turnRight;
 
     if (angularError > 0)
-            {
-                if (angularError > 180)
-                {
-                    // left
-                    angularError = 360 - angularError;
-                    turnRight = false;
-                }
-                else
-                {
-                    // right
-                    turnRight = true;
-                }
-            }
-            else
-            {
-                if (angularError < -180)
-                {
-                    // right
-                    angularError = 360 + angularError;
-                    turnRight = true;
-                }
-                else
-                {
-                    // left
-                    angularError = angularError * -1;
-                    turnRight = false;
-                }
-            }
+    {
+        if (angularError > 180)
+        {
+            // left
+            angularError = 360 - angularError;
+            turnRight = false;
+        }
+        else
+        {
+            // right
+            turnRight = true;
+        }
+    }
+    else
+    {
+        if (angularError < -180)
+        {
+            // right
+            angularError = 360 + angularError;
+            turnRight = true;
+        }
+        else
+        {
+            // left
+            angularError = angularError * -1;
+            turnRight = false;
+        }
+    }
 
-            if(turnRight)
-            {
-                return angularError;
-            }
-            else
-            {
-                return angularError * -1;
-            }
+    if (turnRight)
+    {
+        return angularError;
+    }
+    else
+    {
+        return angularError * -1;
+    }
 
 }
