@@ -150,24 +150,25 @@ namespace auton
 
         backLift_up();
 
-        pid::delaySeconds(0.5);
+        pid::delaySeconds(0.3);
 
 
         pid::drivePID(1200);
-        pid::delaySeconds(0.5);
+        pid::delaySeconds(0.3);
         // pid::turnPID(27);
         pid::turnPID(30);
         pid::drivePID(1300);
         pid::drivePID(200, 300);
         claw_open(false);
-        pid::delaySeconds(1.0);
+        pid::delaySeconds(1.2);
         frontLift_up_higher(true);
-        pid::turnPID(37);
         roller_on();
-        pid::drivePID(1700);
+        //pid::turnPID(50);
+        pid::drivePID(1300);
+        //pid::drivePID(-70);
+        pid::turnPID(90);
         backLift_down();
-        roller_off();
-        pid::drivePID(300);
+        pid::drivePID(1000);
         // pid::delaySeconds(0.5);
 
         // balance the platform
@@ -175,14 +176,18 @@ namespace auton
         // frontLift_up(false);
         pid::delaySeconds(0.2);
         // pid::drivePID(500, 100);
-        drive::drive(500);
-        pid::delaySeconds(0.3);
+        drive::drive(450);
+        roller_off();
+        pid::delaySeconds(0.8);
+        frontLift_up(true);
         auton::claw_open(true);
+
         // backLift_down();
 
 
 
         pid::delaySeconds(0.5);
+        frontLift_up_higher(true);
         pid::turnPID(0);
 
         //back up to tall neutral goal
@@ -215,7 +220,8 @@ namespace auton
 
         pid::turnPID(100);
         // pid::delaySeconds(0.4);
-        pid::drivePID(-1500);
+        pid::drivePID(-1700);
+        pid::drivePID(200);
         // turn torwards left neutral to push
         pid::turnPID(205);
         pid::drivePID(-2600);
@@ -226,6 +232,7 @@ namespace auton
         pid::delaySeconds(0.2);
         pid::turnPID(270);
         pid::delaySeconds(0.2);
+        roller_on();
         frontLift_up_higher(true);
         pid::drivePID(2000);
         pid::turnPID(0);
@@ -241,6 +248,7 @@ namespace auton
 
         //
         frontLift_down();
+        roller_off();
         
 
         pid::drivePID(-200);
@@ -258,9 +266,10 @@ namespace auton
 
         // turn to blue mogo on red side
         pid::turnPID(-55);
-        pid::drivePID(350, 755);
+        pid::drivePID(350, 785);
         claw_open(false);
-        pid::delaySeconds(0.5);
+        pid::delaySeconds(0.8);
+        roller_on();
         frontLift_up(true);
         pid::drivePID(-200, 300);
 
@@ -273,6 +282,7 @@ namespace auton
         claw_open(true);
         pid::delaySeconds(0.3);
         pid::drivePID(-500);
+        roller_off();
         // pid::turnPID(90);
         // pid::delaySeconds(0.3);
         // pid::distancePID(500, false);
@@ -498,7 +508,7 @@ namespace auton
         }
         else
         {
-            int err = claw.moveAbsolute(900, 100);
+            int err = claw.moveAbsolute(1000, 100);
             // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
@@ -670,7 +680,7 @@ namespace pid
         double kI = 0.01;
         double kD = 0.35;
 
-        double kP_angular = 7.0;
+        double kP_angular = 8.0;
         bool turnRight;
 
         double errorSum = 0;
