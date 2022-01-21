@@ -130,7 +130,7 @@ namespace auton
         // pid::distancePID(1000, false);
 
         //backLift_low();
-        pid::drivePID(-500);
+        pid::drivePID(-700);
         pid::drivePID(-3500);
         // pid::delaySeconds(100);
 
@@ -146,7 +146,7 @@ namespace auton
 
 
         pid::turnPID(-48);
-        pid::drivePID(-1300);
+        pid::drivePID(-1200);
 
         backLift_up();
 
@@ -168,7 +168,7 @@ namespace auton
         //pid::drivePID(-70);
         pid::turnPID(90);
         backLift_down();
-        pid::drivePID(1000);
+        pid::drivePID(700);
         // pid::delaySeconds(0.5);
 
         // balance the platform
@@ -179,7 +179,7 @@ namespace auton
         drive::drive(450);
         roller_off();
         pid::delaySeconds(0.8);
-        pid::turnPID(-25);
+        // pid::turnPID(-25);
         pid::delaySeconds(0.2);
         frontLift_up(true);
         auton::claw_open(true);
@@ -190,7 +190,7 @@ namespace auton
 
         pid::delaySeconds(0.5);
         frontLift_up_higher(true);
-        pid::turnPID(0);
+        pid::turnPID(-10);
 
         //back up to tall neutral goal
         // drivePID 50 was taken off
@@ -253,10 +253,10 @@ namespace auton
         roller_off();
 
 
-        pid::drivePID(-200);
+        drive::drive(-500);
 
 
-        pid::delaySeconds(0.2);
+        pid::delaySeconds(0.5);
         pid::turnPID(90);
         // pid::delaySeconds(0.2);
         backLift_down();
@@ -510,7 +510,7 @@ namespace auton
         }
         else
         {
-            int err = claw.moveAbsolute(1000, 100);
+            int err = claw.moveAbsolute(950, 100);
             // int err = claw.moveVoltage(2000);
             pros::lcd::print(7, "claw close>> %5.2f  err:%d", claw.getPosition(), err);
         }
@@ -547,7 +547,7 @@ namespace auton
     }
     void backLift_up()
     {
-        liftBack.moveRelative(-1350, 100);
+        liftBack.moveRelative(-1400, 100);
     }
 
     void frontLift_up(bool up)
