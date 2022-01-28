@@ -146,29 +146,29 @@ namespace auton
 
 
         pid::turnPID(-48);
-        pid::drivePID(-1200);
+        pid::drivePID(-1100);
 
         backLift_up();
 
         pid::delaySeconds(0.6);
 
-
+        claw_open(true);
         pid::drivePID(1200);
         pid::delaySeconds(0.3);
         // pid::turnPID(27);
         pid::turnPID(30);
-        pid::drivePID(1300);
-        pid::drivePID(200, 300);
+        pid::drivePID(1500);
+        // pid::drivePID(200, 300);
         claw_open(false);
-        pid::delaySeconds(1.2);
+        pid::delaySeconds(0.5);
         frontLift_up_higher(true);
         roller_on();
-        //pid::turnPID(50);
-        pid::drivePID(1300);
+        pid::turnPID(37);
+        pid::drivePID(1700);
         //pid::drivePID(-70);
-        pid::turnPID(90);
+        // pid::turnPID(90);
         backLift_down();
-        pid::drivePID(700);
+        pid::drivePID(500);
         // pid::delaySeconds(0.5);
 
         // balance the platform
@@ -190,7 +190,9 @@ namespace auton
 
         pid::delaySeconds(0.5);
         frontLift_up_higher(true);
-        pid::turnPID(-10);
+        pid::turnPID(0);
+
+        pid::delaySeconds(40);
 
         //back up to tall neutral goal
         // drivePID 50 was taken off
@@ -505,7 +507,7 @@ namespace auton
     {
         if (open)
         {
-            int err = claw.moveAbsolute(400, 100);
+            int err = claw.moveAbsolute(500, 100);
             pros::lcd::print(6, "claw  open>> %5.2f  err:%d", claw.getPosition(), err);
         }
         else
@@ -547,7 +549,7 @@ namespace auton
     }
     void backLift_up()
     {
-        liftBack.moveRelative(-1400, 100);
+        liftBack.moveRelative(-1500, 100);
     }
 
     void frontLift_up(bool up)
