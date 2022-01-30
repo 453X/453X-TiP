@@ -10,12 +10,14 @@ namespace mogoLift
     void init()
     {
         lift.setBrakeMode(AbstractMotor::brakeMode::hold);
+        lift.tarePosition();
     }
 
     void opcontrol()
     {
         Controller master;
         ControllerButton R2(ControllerDigital::R2);
+        ControllerButton up(ControllerDigital::up);
         ControllerButton shift(ControllerDigital::L2);
 
         if (shift.isPressed())
@@ -39,6 +41,7 @@ namespace mogoLift
             else
             {
                 lift.moveVelocity(0);
+                lift.tarePosition();
             }
         }
     }

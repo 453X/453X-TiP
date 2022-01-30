@@ -112,6 +112,20 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
+        // pid::drivePID(1000);
+        // pid::delaySeconds(5);
+        // pid::drivePID(-1000);
+        // pid::delaySeconds(100);
+
+        // pid::turnPID(45);
+        // pid::delaySeconds(3);
+        // pid::turnPID(90);
+        // pid::delaySeconds(3);
+        // pid::turnPID(225);
+        // pid::delaySeconds(3);
+        // pid::turnPID(0);
+        // pid::delaySeconds(100);
+
         // pid::turnPID(90);
         // pid::delaySeconds(3);
         // pid::turnPID(0);
@@ -131,7 +145,7 @@ namespace auton
 
         //backLift_low();
         pid::drivePID(-700);
-        pid::drivePID(-3500);
+        pid::drivePID(-3200); //originally -3500
         // pid::delaySeconds(100);
 
         // drive::drive(3500, -300);
@@ -142,33 +156,33 @@ namespace auton
 
         pid::delaySeconds(0.2);
 
-        pid::drivePID(290);
+        pid::drivePID(490);
 
 
-        pid::turnPID(-48);
-        pid::drivePID(-1100);
+        pid::turnPID(-52);
+        pid::drivePID(-950);
 
         backLift_up();
 
         pid::delaySeconds(0.6);
 
         claw_open(true);
-        pid::drivePID(1200);
+        pid::drivePID(800);
         pid::delaySeconds(0.3);
         // pid::turnPID(27);
         pid::turnPID(30);
         pid::drivePID(1500);
         // pid::drivePID(200, 300);
         claw_open(false);
-        pid::delaySeconds(0.5);
+        pid::delaySeconds(0.3);
         frontLift_up_higher(true);
         roller_on();
-        pid::turnPID(37);
-        pid::drivePID(1700);
+        pid::turnPID(42);
+        pid::drivePID(1200); //originally 1200
         //pid::drivePID(-70);
         // pid::turnPID(90);
         backLift_down();
-        pid::drivePID(500);
+        pid::drivePID(400);
         // pid::delaySeconds(0.5);
 
         // balance the platform
@@ -176,11 +190,10 @@ namespace auton
         // frontLift_up(false);
         pid::delaySeconds(0.2);
         // pid::drivePID(500, 100);
-        drive::drive(450);
+        drive::drive(500);
         roller_off();
         pid::delaySeconds(0.8);
         // pid::turnPID(-25);
-        pid::delaySeconds(0.2);
         frontLift_up(true);
         auton::claw_open(true);
 
@@ -190,7 +203,25 @@ namespace auton
 
         pid::delaySeconds(0.5);
         frontLift_up_higher(true);
+        // pid::turnPID(0);
+        pid::drivePID(-550);
+        frontLift_down();
+        pid::turnPID(-125);
+        pid::drivePID(400);
+        claw_open(false);
+        pid::delaySeconds(0.5);
+        frontLift_up_higher(true);
+        pid::drivePID(-700);
         pid::turnPID(0);
+
+        drive::drive(500);
+        roller_off();
+        pid::delaySeconds(0.8);
+        // pid::turnPID(-25);
+        frontLift_up(true);
+        auton::claw_open(true);
+
+
 
         pid::delaySeconds(40);
 
@@ -539,6 +570,7 @@ namespace auton
         {
             liftBack.moveVoltage(12000);
         }
+        liftBack.moveRelative(800, 100);
         liftBack.moveVelocity(0);
         liftBack.tarePosition();
     }
@@ -679,12 +711,13 @@ namespace pid
         int power = 0;
         int tune = 0;
         int setPoint = abs(units);
+        int powerCap = 450;
 
-        double kP = 0.8;
-        double kI = 0.01;
+        double kP = 0.9;
+        double kI = 0.08;
         double kD = 0.35;
 
-        double kP_angular = 8.0;
+        double kP_angular = 11.0;
         bool turnRight;
 
         double errorSum = 0;
@@ -734,13 +767,13 @@ namespace pid
                 }
             }
 
-            if (direction * (error * kP + derivative * kD + errorSum * kI) >= 500)
+            if (direction * (error * kP + derivative * kD + errorSum * kI) >= powerCap)
             {
-                power = 500;
+                power = powerCap;
             }
-            else if (direction * (error * kP + derivative * kD + errorSum * kI) <= -500)
+            else if (direction * (error * kP + derivative * kD + errorSum * kI) <= -powerCap)
             {
-                power = -500;
+                power = -powerCap;
             }
             else
             {
@@ -756,13 +789,13 @@ namespace pid
                 tune = angularError * kP_angular * -1;
             }
 
-            if (tune > 100)
+            if (tune > 600 - powerCap)
             {
-                tune = 100;
+                tune = 600 - powerCap;
             }
-            else if (tune < -100)
+            else if (tune < -600 + powerCap)
             {
-                tune = -100;
+                tune = -600 + powerCap;
             }
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
@@ -780,9 +813,9 @@ namespace pid
 
             float rRate = 1.0f;
             float lRate = 1.0f;
-
-            left.moveVelocity(power * lRate + tune);
-            right.moveVelocity(power * rRate - tune);
+            
+            left.moveVoltage((power * lRate + tune) * 20);
+            right.moveVoltage((power * rRate - tune) * 20);
 
             pros::delay(10);
         }
