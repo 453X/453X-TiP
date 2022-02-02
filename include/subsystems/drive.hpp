@@ -28,6 +28,7 @@ namespace auton
     void backLift_down();
     void backLift_low();
     void backLift_up();
+    void backLift_up_higher();
     void frontLift_up(bool up);
     void frontLift_up_higher(bool up);
     void frontLift_down();
