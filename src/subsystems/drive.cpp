@@ -144,8 +144,8 @@ namespace auton
         // pid::distancePID(1000, false);
 
         // backLift_low();
-        pid::drivePID(-700);
-        pid::drivePID(-2800); // originally -3500
+        // pid::drivePID(-700);
+        pid::drivePID(-3500); // originally -3500
         // pid::delaySeconds(100);
 
         // drive::drive(3500, -300);
@@ -175,16 +175,23 @@ namespace auton
         // pid::drivePID(200, 300);
         claw_open(false);
         pid::delaySeconds(0.3);
-        frontLift_up_higher(true);
+        // frontLift_up_higher(true);
         roller_on();
-        pid::turnPID(38);
-        pid::drivePID(900); // originally 1200
+        // pid::turnPID(38);
+        pid::drivePID(1100); // originally 1200
         // pid::drivePID(-70);
         //  pid::turnPID(90);
-        backLift_down();
-        pid::drivePID(350);
+        // backLift_down();
+        // pid::drivePID(350);
         // pid::delaySeconds(0.5);
 
+        pid::turnPID(90);
+
+        frontLift_up_higher(true);
+        backLift_down();
+        pid::delaySeconds(0.3);
+        pid::drivePID(500);
+        // pid::distancePID(1600, true);
         // balance the platform
         pid::turnPID(0);
         // frontLift_up(false);
@@ -201,44 +208,138 @@ namespace auton
 
         // backLift_down();
 
-        pid::delaySeconds(0.5);
+        pid::delaySeconds(0.8);
         frontLift_up_higher(true);
         // pid::turnPID(0);
-        pid::drivePID(-550);
+        pid::drivePID(-400);
         frontLift_down();
 
         // face released goal
-        pid::turnPID(-150);
-        pid::drivePID(400);
+        pid::turnPID(-90);
+        pid::drivePID(700);
         claw_open(false);
         pid::delaySeconds(0.5);
         frontLift_up_higher(true);
 
-        pid::drivePID(-200);
-        pid::turnPID(-90);
-        pid::drivePID(-600);
+        // pid::drivePID(-200);
+        // pid::turnPID(-90);
+        pid::drivePID(-900);
         pid::turnPID(0);
 
         drive::drive(500);
         roller_off();
         pid::delaySeconds(0.8);
         // pid::turnPID(-25);
-        frontLift_up(true);
+        frontLift_up_higher(true);
         auton::claw_open(true);
 
         pid::delaySeconds(0.5);
 
         // back up to tall neutral goal
         //  drivePID 50 was taken off
-        frontLift_down();
-
+        // frontLift_up_higher(true);
         pid::drivePID(-500);
+        frontLift_down();
+        pid::delaySeconds(0.4);
+
 
         // face tall neutral goal
         pid::turnPID(180);
 
         pid::drivePID(800);
         claw_open(false);
+
+        pid::delaySeconds(0.5);
+        // pid::turnPID(180);
+        frontLift_up_higher(true);
+        pid::drivePID(1000);
+
+        drive::drive(500);
+        roller_off();
+        pid::delaySeconds(0.5);
+
+        frontLift_up(true);
+        pid::delaySeconds(0.5);
+        claw_open(true);
+        pid::delaySeconds(1.5);
+        frontLift_up_higher(true);
+        pid::drivePID(-300);
+        frontLift_down();
+
+        // face red goal on blue home zone
+        pid::turnPID(90);
+        pid::delaySeconds(0.2);
+
+        // pid::drivePID(1100);
+        backLift_down();
+        pid::distancePID(600, true);
+
+        auton::claw_open(false);
+        pid::delaySeconds(0.5);
+
+        pid::drivePID(-700);
+
+        pid::turnPID(180);
+        // pid::delaySeconds(0.4);
+        pid::drivePID(-2300);
+        backLift_up();
+        pid::delaySeconds(0.5);
+
+        pid::turnPID(-90);
+        pid::delaySeconds(0.2);
+        roller_on();
+        frontLift_up_higher(true);
+        pid::drivePID(2000);
+        pid::turnPID(0);
+        // drive::drive(120, 100);
+
+        pid::drivePID(550);
+        drive::drive(400);
+        pid::delaySeconds(0.4);
+
+        // release red goal on platform
+        claw_open(true);
+        pid::delaySeconds(0.4);
+
+        //
+        frontLift_down();
+        roller_off();
+
+        drive::drive(-500);
+
+        pid::delaySeconds(0.5);
+        pid::turnPID(90);
+        // pid::delaySeconds(0.2);
+        backLift_down();
+        pid::distancePID(500, true);
+
+        //
+        pid::turnPID(0);
+        pid::distancePID(700, true);
+
+        // turn to blue mogo on red side
+        pid::turnPID(-55);
+        pid::drivePID(350, 785);
+        claw_open(false);
+        pid::delaySeconds(0.8);
+        roller_on();
+        frontLift_up(true);
+        pid::drivePID(-200, 300);
+
+        pid::turnPID(207);
+        pid::delaySeconds(0.3);
+        frontLift_up_higher(true);
+        pid::drivePID(4200);
+        drive::drive(500);
+        pid::delaySeconds(0.3);
+        claw_open(true);
+        pid::delaySeconds(0.3);
+        pid::drivePID(-500);
+        roller_off();
+
+
+
+
 
         pid::delaySeconds(100);
 
