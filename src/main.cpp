@@ -61,44 +61,43 @@ void autonomous()
     // pid::delaySeconds(3);
     // auton::redRight();
     // auton::rightOneGoal();
-    //auton::leftRing();
-    
-        if (selector::auton == 0)
-        {
-            auton::skills();
-        }
+    // auton::leftRing();
 
-        else if (selector::auton == 1)
-        { // run auton for Front Red
-            // auton::rightOneGoal();
-            auton::skills();
-        }
+    if (selector::auton == 0)
+    {
+        auton::skills();
+    }
 
-        else if (selector::auton == 2)
-        {
-            auton::leftRing();
+    else if (selector::auton == 1)
+    { // run auton for Front Red
+        // auton::rightOneGoal();
+        auton::skills();
+    }
 
-        }
+    else if (selector::auton == 2)
+    {
+        auton::leftRing();
+    }
 
-        else if (selector::auton == 3)
-        {
-            auton::singleAWP();
-        }
+    else if (selector::auton == 3)
+    {
+        auton::singleAWP();
+    }
 
-        else if (selector::auton == -1)
-        {
-            auton::rightOneGoal();
-        }
+    else if (selector::auton == -1)
+    {
+        auton::rightOneGoal();
+    }
 
-        else if (selector::auton == -2)
-        {
-            auton::leftRing();
-        }
+    else if (selector::auton == -2)
+    {
+        auton::leftRing();
+    }
 
-        else if (selector::auton == -3)
-        {
-            auton::leftGoal();
-        }
+    else if (selector::auton == -3)
+    {
+        auton::leftGoal();
+    }
 }
 
 /**

@@ -138,7 +138,7 @@ namespace auton
         // pid::drivePID(-500);
         backLift_down();
         // pid::turnPID(0);
-        pid::delaySeconds(0.5);
+        // pid::delaySeconds(0.5);
         //  pid::delaySeconds(2.0);
 
         // pid::distancePID(1000, false);
@@ -167,24 +167,25 @@ namespace auton
 
         claw_open(true);
         pid::drivePID(800);
-        pid::delaySeconds(0.3);
+        // pid::delaySeconds(0.3);
         // pid::turnPID(27);
-        pid::turnPID(31);
+        pid::turnPID(28);
         // pid::delaySeconds(0.5);
         pid::drivePID(1500);
         // pid::drivePID(200, 300);
         claw_open(false);
-        pid::delaySeconds(0.3);
+        // pid::delaySeconds(0.3);
         // frontLift_up_higher(true);
         roller_on();
         // pid::turnPID(38);
-        pid::drivePID(1100); // originally 1200
+        pid::drivePID(1000); // originally 1200
+        frontLift_up(true);
         // pid::drivePID(-70);
         //  pid::turnPID(90);
         // backLift_down();
         // pid::drivePID(350);
         // pid::delaySeconds(0.5);
-
+        frontLift_down();
         pid::turnPID(90);
 
         frontLift_up_higher(true);
@@ -195,7 +196,7 @@ namespace auton
         // balance the platform
         pid::turnPID(0);
         // frontLift_up(false);
-        pid::delaySeconds(0.2);
+        // pid::delaySeconds(0.2);
 
         backLift_up_higher();
         // pid::drivePID(500, 100);
@@ -208,32 +209,35 @@ namespace auton
 
         // backLift_down();
 
-        pid::delaySeconds(0.8);
+        pid::delaySeconds(0.2);
         frontLift_up_higher(true);
         // pid::turnPID(0);
-        pid::drivePID(-400);
+        pid::drivePID(-300);
         frontLift_down();
 
         // face released goal
         pid::turnPID(-90);
         pid::drivePID(700);
         claw_open(false);
-        pid::delaySeconds(0.5);
+        pid::delaySeconds(0.4);
         frontLift_up_higher(true);
 
         // pid::drivePID(-200);
         // pid::turnPID(-90);
-        pid::drivePID(-900);
+        pid::drivePID(-800);
         pid::turnPID(0);
 
         drive::drive(500);
         roller_off();
-        pid::delaySeconds(0.8);
+        pid::delaySeconds(0.4);
         // pid::turnPID(-25);
         frontLift_up_higher(true);
         auton::claw_open(true);
 
         pid::delaySeconds(0.5);
+        pid::drivePID(300, -200);
+
+        pid::turnPID(0);
 
         // back up to tall neutral goal
         //  drivePID 50 was taken off
@@ -241,7 +245,6 @@ namespace auton
         pid::drivePID(-500);
         frontLift_down();
         pid::delaySeconds(0.4);
-
 
         // face tall neutral goal
         pid::turnPID(180);
@@ -252,6 +255,7 @@ namespace auton
         pid::delaySeconds(0.5);
         // pid::turnPID(180);
         frontLift_up_higher(true);
+        pid::delaySeconds(0.3);
         pid::drivePID(1000);
 
         drive::drive(500);
@@ -277,7 +281,9 @@ namespace auton
         auton::claw_open(false);
         pid::delaySeconds(0.5);
 
-        pid::drivePID(-700);
+        frontLift_up(true);
+
+        pid::drivePID(-500);
 
         pid::turnPID(180);
         // pid::delaySeconds(0.4);
@@ -289,11 +295,11 @@ namespace auton
         pid::delaySeconds(0.2);
         roller_on();
         frontLift_up_higher(true);
-        pid::drivePID(2000);
+        pid::drivePID(1000);
         pid::turnPID(0);
         // drive::drive(120, 100);
 
-        pid::drivePID(550);
+        // pid::drivePID(550);
         drive::drive(400);
         pid::delaySeconds(0.4);
 
@@ -337,12 +343,7 @@ namespace auton
         pid::drivePID(-500);
         roller_off();
 
-
-
-
-
         pid::delaySeconds(100);
-
 
         pid::drivePID(-1250);
         pid::delaySeconds(0.3);
@@ -1040,7 +1041,7 @@ namespace pid
         double derivative;
         double prevError = 0;
 
-        double kP = 6.5;
+        double kP = 6.3;
         double kD = 3.0;
 
         while (true)
@@ -1133,7 +1134,6 @@ namespace pid
         }
 
         timer.clearHardMark();
-        
     }
 
     void distancePID(int setPoint, bool direction)
