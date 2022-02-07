@@ -19,6 +19,7 @@ namespace auton
     void redRight();
     void redRight2();
     void rightOneGoal();
+    void rightOneGoal2();
     void leftGoal();
     void leftRing();
     void singleAWP();

@@ -86,7 +86,7 @@ void autonomous()
 
     else if (selector::auton == -1)
     {
-        auton::rightOneGoal();
+        auton::rightOneGoal2();
     }
 
     else if (selector::auton == -2)

@@ -5,8 +5,8 @@ Motor LF(-1), LB(-2), RF(3), RB(4), liftBack(5), roller(-6), lift(7), claw(-8);
 ADIButton frontLimit('G');
 ADIButton backLimit('H');
 
-MotorGroup left({LF, LB});
-MotorGroup right({RF, RB});
+MotorGroup left({ LF, LB });
+MotorGroup right({ RF, RB });
 
 ADIEncoder leftEncoder('A', 'B', true);
 ADIEncoder rightEncoder('C', 'D', false);
@@ -21,20 +21,20 @@ bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto driveOdom = ChassisControllerBuilder()
-                     //  .withMotors(-1,3)
-                     .withMotors(
-                         {-1, -2}, // Left motors are 1 & 2
-                         {3, 4})   // Right motors are 3 & 4
+//  .withMotors(-1,3)
+.withMotors(
+    { -1, -2 }, // Left motors are 1 & 2
+    { 3, 4 })   // Right motors are 3 & 4
 
-                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+// Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+.withDimensions({ AbstractMotor::gearset::blue, (84.0 / 36.0) }, { {4_in, 35.4_cm}, imev5BlueTPR })
 
-                     // track        = distance between the center of the 2 tracking wheels
-                     // wheel track  = distance between the center of the 2 wheels on either side
+// track        = distance between the center of the 2 tracking wheels
+// wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder)
-                     .build();
+.withSensors(leftEncoder, rightEncoder)
+.build();
 
 namespace drive
 {
@@ -68,7 +68,7 @@ namespace drive
 
         // Arcade drive with the left stick.
         driveOdom->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-                                      master.getAnalog(ControllerAnalog::leftX));
+            master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -539,6 +539,87 @@ namespace auton
         pid::delaySeconds(0.5);
         backLift_down();
         drive::drive(100, 200);
+        // drive::drive(500, -200);
+        // pid::delaySeconds(1.0);
+        // drive::drive(500, 100);
+        // drive::drive(-200, 1000);
+
+        pid::stop();
+    }
+    void rightOneGoal2()
+    {
+        pid::inertialReset();
+
+        pros::lcd::initialize();
+        pid::resetDriveEncoders();
+        claw.tarePosition();
+        lift.tarePosition();
+
+
+        // left blue goal
+        backLift_down();
+        pid::drivePID(-800);
+        backLift_up();
+        // backLift_low();
+        pid::delaySeconds(0.1);
+        pid::turnPID(-90);
+        roller_on();
+        pid::drivePID(-1500);
+        roller_off();
+        backLift_down();
+        pid::turnPID(-135);
+
+        // move to yellow goal
+        pid::drivePID(700);
+        claw_open(false);
+        pid::delaySeconds(1.0);
+        frontLift_up(true);
+
+        // move to central yellow goal
+        pid::turnPID(-75);
+        pid::drivePID(-500);
+        backLift_up();
+        pid::turnPID(-45);
+        pid::drivePID(1000);
+        // move and grab
+
+        // pid::turnPID(-45);
+        // pid::drivePID(1800);
+
+        // drive::drive(1700, 600);
+
+        // claw_open(false);
+        // pid::delaySeconds(1.5);
+
+        // lift yellow goal
+        // frontLift_up(true);
+        // pid::delaySeconds(0.5);
+
+        // back
+        // pid::drivePID(-1100);
+
+        // // release yellow goal
+        // pid::turnPID(-90);
+        // drive::drive(100, 100);
+        // frontLift_up(false);
+        // claw_open(true);
+        // pid::delaySeconds(0.1);
+
+        // // back and lift red goal
+        // backLift_down();
+        // pid::drivePID(-550);
+        // drive::drive(-300, 100);
+        // backLift_up();
+        // pid::delaySeconds(0.5);
+        // frontLift_up(true);
+        // pid::drivePID(50);
+        // auton::roller_on();
+        // pid::turnPID(180);
+        // pid::delaySeconds(0.4);
+        // drive::drive(700, 70);
+        // pid::delaySeconds(0.5);
+        // backLift_down();
+        // drive::drive(100, 200);
         // drive::drive(500, -200);
         // pid::delaySeconds(1.0);
         // drive::drive(500, 100);
