@@ -20,13 +20,16 @@ namespace auton
     void redRight2();
     void rightOneGoal();
     void rightOneGoal2();
+    void LRT3Goal();
     void leftGoal();
     void leftRing();
     void singleAWP();
+    void test();
 
     void claw_open(bool b);
     void claw_open(bool b, double d);
     void backLift_down();
+    void backLift_down_nonblocking();
     void backLift_low();
     void backLift_up();
     void backLift_up_higher();
@@ -54,9 +57,12 @@ namespace pid
     void stop(double seconds);
 
     void drivePID(int units);
+    void drivePID(int units, double p, double i, double d);
     void drivePID(int maxPower, int units);
+    void turnPID(double deg, double kP, double kD);
     void turnPID(double deg);
     void distancePID(int, bool direction);
+    void moveQuadratic(int units);
 
     double correctionDegrees(double heading, double setPoint);
 

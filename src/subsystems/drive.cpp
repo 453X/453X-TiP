@@ -5,8 +5,8 @@ Motor LF(-1), LB(-2), RF(3), RB(4), liftBack(5), roller(-6), lift(7), claw(-8);
 ADIButton frontLimit('G');
 ADIButton backLimit('H');
 
-MotorGroup left({ LF, LB });
-MotorGroup right({ RF, RB });
+MotorGroup left({LF, LB});
+MotorGroup right({RF, RB});
 
 ADIEncoder leftEncoder('A', 'B', true);
 ADIEncoder rightEncoder('C', 'D', false);
@@ -20,21 +20,42 @@ Timer timer;
 bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
-auto driveOdom = ChassisControllerBuilder()
-//  .withMotors(-1,3)
-.withMotors(
-    { -1, -2 }, // Left motors are 1 & 2
-    { 3, 4 })   // Right motors are 3 & 4
+auto chassis = ChassisControllerBuilder()
+                     //  .withMotors(-1,3)
+                     .withMotors(
+                         {-1, -2}, // Left motors are 1 & 2
+                         {3, 4})   // Right motors are 3 & 4
 
-// Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-.withDimensions({ AbstractMotor::gearset::blue, (84.0 / 36.0) }, { {4_in, 35.4_cm}, imev5BlueTPR })
+                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
 
-// track        = distance between the center of the 2 tracking wheels
-// wheel track  = distance between the center of the 2 wheels on either side
+                     // track        = distance between the center of the 2 tracking wheels
+                     // wheel track  = distance between the center of the 2 wheels on either side
 
-.withSensors(leftEncoder, rightEncoder)
-.build();
+                     .withSensors(leftEncoder, rightEncoder)
+                     .build();
+
+auto odom = ChassisControllerBuilder()
+    .withMotors(
+                         {-1, -2}, // Left motors are 1 & 2
+                         {3, 4})   // Right motors are 3 & 4
+    .withGains(
+        {0.001, 0, 0.0001}, // distance controller gains
+        {0.001, 0, 0.0001}, // turn controller gains
+        {0.001, 0, 0.0001}  // angle controller gains (helps drive straight)
+    )
+    .withSensors(
+        leftEncoder, // left encoder in ADI ports A & B
+        rightEncoder  // right encoder in ADI ports C & D (reversed)
+    )
+    // Blue gearset, external ratio of 1.0, 4 inch wheel diameter, 35.4 cm wheel track
+    // 1 inch middle encoder distance, and 2.75 inch middle wheel diameter
+    .withDimensions({AbstractMotor::gearset::green, 1.0}, {{2.75_in, 35.4_cm}, imev5GreenTPR})
+    .withOdometry() // use the same scales as the chassis (above)
+    .buildOdometry(); // build an odometry chassis
+
+
 
 namespace drive
 {
@@ -67,8 +88,8 @@ namespace drive
         Controller master;
 
         // Arcade drive with the left stick.
-        driveOdom->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-            master.getAnalog(ControllerAnalog::leftX));
+        chassis->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
+                                      master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -112,10 +133,11 @@ namespace auton
         claw.tarePosition();
         lift.tarePosition();
 
-        // pid::drivePID(1000);
-        // pid::delaySeconds(5);
-        // pid::drivePID(-1000);
-        // pid::delaySeconds(100);
+        pid::drivePID(2000);
+        pid::delaySeconds(5);
+        pid::drivePID(-2000);
+        pid::stop();
+        pid::delaySeconds(100);
 
         // pid::turnPID(45);
         // pid::delaySeconds(3);
@@ -548,39 +570,41 @@ namespace auton
     }
     void rightOneGoal2()
     {
-        pid::inertialReset();
+        // pid::inertialReset();
 
         pros::lcd::initialize();
         pid::resetDriveEncoders();
         claw.tarePosition();
         lift.tarePosition();
 
-
         // left blue goal
         backLift_down();
-        pid::drivePID(-800);
+        pid::drivePID(-700);
         backLift_up();
         // backLift_low();
         pid::delaySeconds(0.1);
         pid::turnPID(-90);
         roller_on();
-        pid::drivePID(-1500);
+        claw_open(true);
+        pid::drivePID(-1000);
         roller_off();
         backLift_down();
-        pid::turnPID(-135);
+        pid::turnPID(-155);
 
         // move to yellow goal
         pid::drivePID(700);
         claw_open(false);
-        pid::delaySeconds(1.0);
-        frontLift_up(true);
+        pid::delaySeconds(0.4);
+        // frontLift_up(true);
 
         // move to central yellow goal
-        pid::turnPID(-75);
-        pid::drivePID(-500);
+        pid::turnPID(-80);
+        pid::drivePID(-700);
         backLift_up();
-        pid::turnPID(-45);
-        pid::drivePID(1000);
+        pid::delaySeconds(0.5);
+        frontLift_up(true);
+        pid::turnPID(-45, 5.0, 2.0);
+        pid::drivePID(1500);
         // move and grab
 
         // pid::turnPID(-45);
@@ -626,6 +650,52 @@ namespace auton
         // drive::drive(-200, 1000);
 
         pid::stop();
+    }
+
+    void LRT3Goal()
+    {
+        pros::lcd::initialize();
+        pid::resetDriveEncoders();
+        claw.tarePosition();
+        lift.tarePosition();
+
+        // // left blue goal
+        // backLift_down();
+        // pid::drivePID(-700, 30.0, 2.0, 30.0);
+        // backLift_up();
+        // // backLift_low();
+        // pid::delaySeconds(0.3);
+        // pid::turnPID(-90);
+        // roller_on();
+        // claw_open(true);
+        // pid::drivePID(-800, 30.0, 2.0, 30.0);
+        // roller_off();
+        // pid::turnPID(180);
+        // backLift_down();
+
+        // frontLift_up(true);
+
+
+        pid::drivePID(2500, 35.0, 2.0, 30.0);
+        pid::turnPID(60, 6.3, 3.0); //240
+        pid::drivePID(-2800, 30.0, 2.0, 30.0);
+
+        pid::turnPID(0, 6.8, 3.0); //180
+        backLift_down_nonblocking();
+        pid::drivePID(2000, 30.0, 2.5, 30.0);
+
+        pid::turnPID(90);
+        // backLift_down();
+        pid::drivePID(-500, 30.0, 2.0, 30.0);
+        backLift_up();
+        pid::delaySeconds(0.7);
+        roller_on();
+    }
+
+    void test()
+    {
+        odom->setState({0_in, 0_in, 0_deg});
+        odom->driveToPoint({-8_ft, 8_ft});
     }
 
     void leftGoal()
@@ -678,7 +748,6 @@ namespace auton
 
         // release yellow goal
         pid::turnPID(-90);
-        frontLift_up(false);
         claw_open(true);
         pid::delaySeconds(0.1);
 
@@ -710,6 +779,9 @@ namespace auton
         pid::drivePID(800);
         pid::drivePID(-800);
     }
+
+
+
 
     void claw_open(bool open)
     {
@@ -743,13 +815,31 @@ namespace auton
 
     void backLift_down()
     {
-        while (!frontLimit.isPressed())
+
+        while (true)
         {
             liftBack.moveVoltage(12000);
+
+            if (frontLimit.isPressed())
+        {
+            timer.placeHardMark();
         }
-        liftBack.moveRelative(1100, 100);
+
+        if(timer.getDtFromHardMark() > 0.1_s)
+        {
+            break;
+        }
+        }
+
+        
         liftBack.moveVelocity(0);
+        timer.clearHardMark();
         liftBack.tarePosition();
+    }
+
+    void backLift_down_nonblocking()
+    {
+        liftBack.moveRelative(3200, 100);
     }
 
     void backLift_low()
@@ -758,9 +848,8 @@ namespace auton
     }
     void backLift_up()
     {
-        liftBack.moveRelative(-1500, 100);
+        liftBack.moveRelative(-1550, 100);
     }
-
     void backLift_up_higher()
     {
         liftBack.moveRelative(-2000, 100);
@@ -885,7 +974,7 @@ namespace pid
         }
     }
 
-    void drivePID(int units)
+    void drivePID(int units, double p, double i, double d)
     { // power in positive, units in positive or negative
         resetDriveEncoders();
         int direction = abs(units) / units;
@@ -893,22 +982,24 @@ namespace pid
         int power = 0;
         int tune = 0;
         int setPoint = abs(units);
-        int powerCap = 450;
+        int powerCap = 12000;
 
-        double kP = 0.9;
-        double kI = 0.08;
-        double kD = 0.35;
+        double kP = p;
+        double kI = i;
+        double kD = d;
 
-        double kP_angular = 30.0;
+        double kP_angular = 0; //800.0;
         bool turnRight;
 
         double errorSum = 0;
+        double prevError = 0;
+
         int fr = 0;
         int fl = 0;
 
         int initHeading = inertial.get();
 
-        while (avgDriveEncoders() < abs(units))
+        while (true)
         {
             double tolerance = 0.5;
             double error = setPoint - avgDriveEncoders();
@@ -916,7 +1007,7 @@ namespace pid
 
             if (error < 100)
                 errorSum += error;
-            double prevError = 0;
+            
             double derivative;
 
             if (angularError > 0)
@@ -971,13 +1062,13 @@ namespace pid
                 tune = angularError * kP_angular * -1;
             }
 
-            if (tune > 600 - powerCap)
+            if (tune > 12000 - powerCap)
             {
-                tune = 600 - powerCap;
+                tune = 12000 - powerCap;
             }
-            else if (tune < -600 + powerCap)
+            else if (tune < -12000 + powerCap)
             {
-                tune = -600 + powerCap;
+                tune = -12000 + powerCap;
             }
 
             // pros::lcd::print(0, "Get encoder  >> %f\n",
@@ -988,20 +1079,49 @@ namespace pid
             pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
             pros::lcd::print(4, "tune >> %3d", tune);
 
+
+
             derivative = error - prevError;
+            pros::lcd::print(5, "derivative >> %3d", derivative);
+
             prevError = error;
 
             //===============================================
 
-            float rRate = 1.0f;
+            float rRate;
             float lRate = 1.0f;
 
-            left.moveVoltage((power * lRate + tune) * 20);
-            right.moveVoltage((power * rRate - tune) * 20);
+            if (power >= 0)
+            {
+                rRate = 0.80f;
+            }
+            else 
+            {
+                rRate = 0.83f;
+            }
+
+            left.moveVoltage(power * lRate + tune);
+            right.moveVoltage(power * rRate - tune);
+
+            if(avgDriveEncoders() > abs(units))
+            {
+                timer.placeHardMark();
+            }
+
+            if(timer.getDtFromHardMark() > 0.3_s)
+            {
+                break;
+            } 
 
             pros::delay(10);
         }
+        timer.clearHardMark();
         stop(0);
+    }
+
+    void drivePID(int units)
+    {
+        drivePID(units, 30.0, 1.0, 30.0);
     }
 
     void drivePID(int maxPower, int units)
@@ -1113,7 +1233,7 @@ namespace pid
         stop(0);
     }
 
-    void turnPID(double deg)
+    void turnPID(double deg, double P, double D)
     {
         double tolerance = 0.3;
         double bias = 0;
@@ -1122,8 +1242,8 @@ namespace pid
         double derivative;
         double prevError = 0;
 
-        double kP = 6.3;
-        double kD = 3.0;
+        double kP = P;
+        double kD = D;
 
         while (true)
         {
@@ -1215,6 +1335,12 @@ namespace pid
         }
 
         timer.clearHardMark();
+    }
+
+    void turnPID(double deg)
+    {
+
+        turnPID(deg, 5.8, 3.0);
     }
 
     void distancePID(int setPoint, bool direction)
@@ -1371,6 +1497,25 @@ namespace pid
         }
 
         stop();
+    }
+
+    void moveQuadratic(int units)
+    {
+        resetDriveEncoders();
+
+        int direction = units / abs(units);
+
+        int x = units;
+        double a = -1.3;
+        double b = 1.2;
+        double c = 0;
+
+        double power = 0;
+
+        while (avgDriveEncoders() < abs(units))
+        {
+            power = 0;
+        }
     }
 
 }
