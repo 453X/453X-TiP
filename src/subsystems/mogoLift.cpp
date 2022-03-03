@@ -10,6 +10,7 @@ namespace mogoLift
     void init()
     {
         lift.setBrakeMode(AbstractMotor::brakeMode::hold);
+        lift.setGearing(AbstractMotor::gearset::red);
         lift.tarePosition();
     }
 

@@ -71,19 +71,19 @@ void autonomous()
     else if (selector::auton == 1)
     { // run auton for Front Red
         // auton::rightOneGoal();
-        // auton::skills();
         // auton::rightOneGoal2();
-        auton::LRT3Goal();
+        // auton::LRT3Goal();
+        auton::skills();
     }
 
     else if (selector::auton == 2)
     {
-        auton::leftRing();
+        auton::rightOneGoal();
     }
 
     else if (selector::auton == 3)
     {
-        auton::singleAWP();
+        auton::rightOneGoal2();
     }
 
     else if (selector::auton == -1)

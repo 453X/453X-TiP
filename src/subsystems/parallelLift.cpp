@@ -10,6 +10,8 @@ namespace parallelLift
     {
         lift.setBrakeMode(AbstractMotor::brakeMode::hold);
         claw.setBrakeMode(AbstractMotor::brakeMode::hold);
+        lift.setGearing(AbstractMotor::gearset::red);
+        claw.setGearing(AbstractMotor::gearset::red);
     }
 
     void opcontrol()

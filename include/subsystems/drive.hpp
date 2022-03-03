@@ -36,6 +36,7 @@ namespace auton
     void frontLift_up(bool up);
     void frontLift_up_higher(bool up);
     void frontLift_down();
+    void frontLift_down_boost();
     void roller_on();
     void roller_off();
 }
