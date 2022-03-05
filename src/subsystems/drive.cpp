@@ -5,6 +5,8 @@ Motor LF(-1), LB(-2), RF(3), RB(4), liftBack(5), roller(-6), lift(7), claw(-8);
 ADIButton frontLimit('G');
 ADIButton backLimit('H');
 
+RotationSensor rotation(20);
+
 MotorGroup left({LF, LB});
 MotorGroup right({RF, RB});
 
@@ -22,41 +24,39 @@ bool driveInitDone = false;
 
 // Chassis Controller - lets us drive the robot around with open- or closed-loop control
 auto chassis = ChassisControllerBuilder()
-                     //  .withMotors(-1,3)
-                     .withMotors(
-                         {-1, -2}, // Left motors are 1 & 2
-                         {3, 4})   // Right motors are 3 & 4
+                   //  .withMotors(-1,3)
+                   .withMotors(
+                       {-1, -2}, // Left motors are 1 & 2
+                       {3, 4})   // Right motors are 3 & 4
 
-                     // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
+                   // Blue gearset, external ratio of (36.0 / 84.0), 4 inch wheel diameter, 35.4 cm wheel track
 
-                     .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
+                   .withDimensions({AbstractMotor::gearset::blue, (84.0 / 36.0)}, {{4_in, 35.4_cm}, imev5BlueTPR})
 
-                     // track        = distance between the center of the 2 tracking wheels
-                     // wheel track  = distance between the center of the 2 wheels on either side
+                   // track        = distance between the center of the 2 tracking wheels
+                   // wheel track  = distance between the center of the 2 wheels on either side
 
-                     .withSensors(leftEncoder, rightEncoder)
-                     .build();
+                   .withSensors(leftEncoder, rightEncoder)
+                   .build();
 
 auto odom = ChassisControllerBuilder()
-    .withMotors(
-                         {-1, -2}, // Left motors are 1 & 2
-                         {3, 4})   // Right motors are 3 & 4
-    .withGains(
-        {0.001, 0, 0.0001}, // distance controller gains
-        {0.001, 0, 0.0001}, // turn controller gains
-        {0.001, 0, 0.0001}  // angle controller gains (helps drive straight)
-    )
-    .withSensors(
-        leftEncoder, // left encoder in ADI ports A & B
-        rightEncoder  // right encoder in ADI ports C & D (reversed)
-    )
-    // Blue gearset, external ratio of 1.0, 4 inch wheel diameter, 35.4 cm wheel track
-    // 1 inch middle encoder distance, and 2.75 inch middle wheel diameter
-    .withDimensions({AbstractMotor::gearset::green, 1.0}, {{4_in, 35.4_cm}, imev5GreenTPR})
-    .withOdometry() // use the same scales as the chassis (above)
-    .buildOdometry(); // build an odometry chassis
-
-
+                .withMotors(
+                    {-1, -2}, // Left motors are 1 & 2
+                    {3, 4})   // Right motors are 3 & 4
+                .withGains(
+                    {0.001, 0, 0.0001}, // distance controller gains
+                    {0.001, 0, 0.0001}, // turn controller gains
+                    {0.001, 0, 0.0001}  // angle controller gains (helps drive straight)
+                    )
+                .withSensors(
+                    leftEncoder, // left encoder in ADI ports A & B
+                    rightEncoder // right encoder in ADI ports C & D (reversed)
+                    )
+                // Blue gearset, external ratio of 1.0, 4 inch wheel diameter, 35.4 cm wheel track
+                // 1 inch middle encoder distance, and 2.75 inch middle wheel diameter
+                .withDimensions({AbstractMotor::gearset::green, 1.0}, {{4_in, 35.4_cm}, imev5GreenTPR})
+                .withOdometry()   // use the same scales as the chassis (above)
+                .buildOdometry(); // build an odometry chassis
 
 namespace drive
 {
@@ -81,6 +81,8 @@ namespace drive
 
         pid::resetDriveEncoders();
         driveInitDone = true;
+
+        rotation.reset();
     }
 
     void opcontrol()
@@ -90,7 +92,7 @@ namespace drive
 
         // Arcade drive with the left stick.
         chassis->getModel()->arcade(master.getAnalog(ControllerAnalog::rightY),
-                                      master.getAnalog(ControllerAnalog::leftX));
+                                    master.getAnalog(ControllerAnalog::leftX));
     }
 
     void turn(double power)
@@ -184,7 +186,7 @@ namespace auton
         pid::drivePID(490);
 
         pid::turnPID(-52);
-        pid::drivePID(-900);
+        pid::drivePID(-850);
 
         backLift_up();
 
@@ -203,7 +205,7 @@ namespace auton
         // frontLift_up_higher(true);
         roller_on();
         // pid::turnPID(38);
-        pid::drivePID(900); // originally 1200
+        pid::drivePID(800); // originally 1200
         frontLift_up(true);
         // pid::drivePID(-70);
         //  pid::turnPID(90);
@@ -216,7 +218,7 @@ namespace auton
         frontLift_up_higher(true);
         backLift_down();
         pid::delaySeconds(0.3);
-        pid::drivePID(500);
+        pid::drivePID(600);
         // pid::distancePID(1600, true);
         // balance the platform
         pid::turnPID(0);
@@ -228,58 +230,81 @@ namespace auton
         drive::drive(500);
         roller_off();
         pid::delaySeconds(0.5);
-        // pid::turnPID(-25);
+
         frontLift_up(true);
+        pid::delaySeconds(0.6);
+        // pid::turnPID(-25);
+        frontLift_up_high(true);
         auton::claw_open(true);
 
         // backLift_down();
 
         pid::delaySeconds(0.2);
         frontLift_up_higher(true);
-        // pid::turnPID(0);
-        pid::drivePID(-400);
-        frontLift_down();
-
-        // face released goal
-        pid::turnPID(-90);
-        pid::drivePID(700);
-        claw_open(false);
-        pid::delaySeconds(0.4);
-        frontLift_up_higher(true);
-
-        // pid::drivePID(-200);
-        // pid::turnPID(-90);
-        pid::drivePID(-1000);
-        backLift_down_nonblocking();
-        pid::turnPID(0);
-
-        drive::drive(500);
-        roller_off();
-        // pid::delaySeconds(0.4);
-        // pid::turnPID(-25);
-
         pid::delaySeconds(0.5);
-        claw_open(true);
-        frontLift_up_higher(true);
-        // pid::turnPID(-10);
 
-        //back up to tall neutral goal
-        // drivePID 50 was taken off
+//============= place goal on platform =============
+
+
+        // // pid::turnPID(0);
+        // pid::drivePID(-400);
+        // frontLift_down();
+        // frontLift_down_boost();
+
+        // // face released goal
+        // pid::turnPID(-90);
+        // pid::drivePID(700);
+        // claw_open(false);
+        // pid::delaySeconds(0.4);
+        // frontLift_up_higher(true);
+
+        // // pid::drivePID(-200);
+        // // pid::turnPID(-90);
+        // pid::drivePID(-900);
+        // backLift_down_nonblocking();
+        // pid::turnPID(0);
+
+        // drive::drive(500);
+        // roller_off();
+        // // pid::delaySeconds(0.4);
+        // // pid::turnPID(-25);
+
+        // pid::delaySeconds(0.5);
+        // claw_open(true);
+        // frontLift_up_higher(true);
+        // pid::delaySeconds(0.8);
+
+//============= place goal on platform =============
+        
+        
+        // backLift_down_nonblocking();
+        pid::drivePID(200, -100);
+        pid::turnPID(0, 3.0, 3.0);
+
+ 
+
+
+
+        // back up to tall neutral goal
+        //  drivePID 50 was taken off
         frontLift_down();
         pid::drivePID(-1250);
-        pid::delaySeconds(0.3);
+        pid::drivePID(250);
+
+        // pid::delaySeconds(0.3);
+        // backLift_up_higher();
+        // pid::delaySeconds(0.8);
         pid::turnPID(-40);
         // backLift_low();
 
-        //push tall goal to red home zone
-        // pid::distancePID(800, false);
-        pid::drivePID(-2500);
+        // push tall goal to red home zone
+        //  pid::distancePID(800, false);
+        pid::drivePID(-1700);
         // pid::delaySeconds(0.5);
 
-        backLift_down();
+        // backLift_down();
         pid::delaySeconds(0.3);
-        pid::drivePID(600);
-
+        // pid::drivePID(600);
 
         // frontLift_up_higher(true);
         // auton::claw_open(true);
@@ -322,9 +347,12 @@ namespace auton
 
         // face red goal on blue home zone
         pid::turnPID(90);
-        frontLift_down();
+        // frontLift_down();
+        // frontLift_down_boost();
         frontLift_down_boost();
-        pid::delaySeconds(0.2);
+        // frontLift_down_rotation();
+
+        // pid::delaySeconds(0.2);
 
         // pid::drivePID(1100);
         backLift_down();
@@ -337,17 +365,18 @@ namespace auton
 
         pid::drivePID(-500);
 
-        pid::turnPID(180);
+        pid::turnPID(180, 1.5, 5.0);
         // pid::delaySeconds(0.4);
         pid::drivePID(-2100);
         backLift_up();
         pid::delaySeconds(0.5);
 
-        pid::turnPID(-90);
+        pid::turnPID(-90, 1.5, 5.0);
+
         pid::delaySeconds(0.2);
         roller_on();
         frontLift_up_higher(true);
-        pid::drivePID(1000);
+        pid::drivePID(1300);
         pid::turnPID(0);
         // drive::drive(120, 100);
 
@@ -367,6 +396,7 @@ namespace auton
 
         pid::delaySeconds(0.5);
         pid::turnPID(90);
+        frontLift_down_boost();
         // pid::delaySeconds(0.2);
         backLift_down();
         pid::distancePID(500, true);
@@ -375,17 +405,18 @@ namespace auton
         pid::turnPID(0);
         backLift_up_higher();
         pid::distancePID(700, true);
+        // frontLift_down_rotation();
 
         // turn to blue mogo on red side
         pid::turnPID(-55);
-        pid::drivePID(350, 785);
+        pid::drivePID(350, 600);
         claw_open(false);
         pid::delaySeconds(0.8);
         roller_on();
         frontLift_up(true);
         pid::drivePID(-200, 300);
 
-        pid::turnPID(207);
+        pid::turnPID(200);
         pid::delaySeconds(0.3);
         frontLift_up_higher(true);
         pid::drivePID(4200);
@@ -400,7 +431,7 @@ namespace auton
 
         pid::drivePID(-1250);
         pid::delaySeconds(0.3);
-        pid::turnPID(-40);
+        pid::turnPID(-30);
         // backLift_low();
 
         // push tall goal to red home zone
@@ -438,7 +469,7 @@ namespace auton
         pid::delaySeconds(0.2);
         roller_on();
         frontLift_up_higher(true);
-        pid::drivePID(2000);
+        pid::drivePID(1800);
         pid::turnPID(0);
         // drive::drive(120, 100);
 
@@ -464,21 +495,23 @@ namespace auton
 
         //
         pid::turnPID(0);
+        backLift_up_higher();
         pid::distancePID(700, true);
 
         // turn to blue mogo on red side
         pid::turnPID(-55);
-        pid::drivePID(350, 785);
+        pid::drivePID(350, 755);
         claw_open(false);
         pid::delaySeconds(0.8);
         roller_on();
         frontLift_up(true);
         pid::drivePID(-200, 300);
 
-        pid::turnPID(207);
+        // pid::turnPID(207);
+        pid::turnPID(200, 1.4, 5.0);
         pid::delaySeconds(0.3);
         frontLift_up_higher(true);
-        pid::drivePID(4200);
+        pid::drivePID(3900);
         drive::drive(500);
         pid::delaySeconds(0.3);
         claw_open(true);
@@ -559,7 +592,6 @@ namespace auton
         claw_open(true);
         // pid::drivePID(1650);
         pid::drivePID(1650, 37.0, 2.0, 30.0);
-
 
         // drive::drive(1700, 600);
 
@@ -712,12 +744,11 @@ namespace auton
 
         // frontLift_up(true);
 
-
         pid::drivePID(2300, 35.0, 2.0, 30.0);
-        pid::turnPID(63, 2.3, 3.0); //240
+        pid::turnPID(63, 2.3, 3.0); // 240
         pid::drivePID(-2700, 30.0, 2.0, 30.0);
 
-        pid::turnPID(0, 2.3, 2.8); //180
+        pid::turnPID(0, 2.3, 2.8); // 180
         backLift_down_nonblocking();
         pid::drivePID(2000, 30.0, 2.5, 30.0);
 
@@ -818,9 +849,6 @@ namespace auton
         pid::drivePID(-800);
     }
 
-
-
-
     void claw_open(bool open)
     {
         if (open)
@@ -859,17 +887,16 @@ namespace auton
             liftBack.moveVoltage(12000);
 
             if (frontLimit.isPressed())
-        {
-            timer.placeHardMark();
+            {
+                timer.placeHardMark();
+            }
+
+            if (timer.getDtFromHardMark() > 0.1_s)
+            {
+                break;
+            }
         }
 
-        if(timer.getDtFromHardMark() > 0.1_s)
-        {
-            break;
-        }
-        }
-
-        
         liftBack.moveVelocity(0);
         timer.clearHardMark();
         liftBack.tarePosition();
@@ -906,6 +933,19 @@ namespace auton
         }
     }
 
+    void frontLift_up_high(bool up)
+    {
+        int pos = 1900;
+        if (up)
+        {
+            lift.moveAbsolute(pos, 127);
+        }
+        else
+        {
+            lift.moveAbsolute(0, 127);
+        }
+    }
+
     void frontLift_up_higher(bool up)
     {
         int pos = 2600;
@@ -919,6 +959,26 @@ namespace auton
         }
     }
 
+    void frontLift_up_higher_rotation()
+    {
+        double angle = 265.0;
+        while (rotation.get() > angle + 1 || rotation.get() < angle - 1)
+        {
+                lift.moveVelocity(100);
+            
+        }
+    }
+
+    void frontLift_down_rotation()
+    {
+        double angle = 0.0;
+        while (rotation.get() > angle + 1 || rotation.get() < angle - 1)
+        {
+                lift.moveVelocity(-100);
+            
+        }
+    }
+
     void frontLift_down()
     {
         lift.moveAbsolute(0, 127);
@@ -926,7 +986,7 @@ namespace auton
 
     void frontLift_down_boost()
     {
-        lift.moveAbsolute(-1000, 127);
+        lift.moveRelative(-600, 127);
     }
 
     void roller_on()
@@ -1031,7 +1091,7 @@ namespace pid
         double kI = i;
         double kD = d;
 
-        double kP_angular = 800.0; //800.0;
+        double kP_angular = 800.0; // 800.0;
         bool turnRight;
 
         double errorSum = 0;
@@ -1053,7 +1113,7 @@ namespace pid
 
             if (error < 100)
                 errorSum += error;
-            
+
             double derivative;
 
             if (angularError > 0)
@@ -1125,8 +1185,6 @@ namespace pid
             pros::lcd::print(3, "fl,fr >> %3d , %3d", fl, fr);
             pros::lcd::print(4, "tune >> %3d", tune);
 
-
-
             derivative = error - prevError;
             pros::lcd::print(5, "derivative >> %3d", derivative);
 
@@ -1141,7 +1199,7 @@ namespace pid
             {
                 rRate = 0.9f;
             }
-            else 
+            else
             {
                 rRate = 0.9f;
             }
@@ -1149,20 +1207,20 @@ namespace pid
             left.moveVoltage(power * lRate + tune);
             right.moveVoltage(power * rRate - tune);
 
-            if(avgDriveEncoders() > abs(units))
+            if (avgDriveEncoders() > abs(units))
             {
                 timer.placeHardMark();
             }
 
-            if(timer.getDtFromHardMark() > 0.3_s)
+            if (timer.getDtFromHardMark() > 0.3_s)
             {
                 break;
-            } 
+            }
 
-        if(timeout_timer.getDtFromHardMark() > timeout)
-        {
-            break;
-        }
+            if (timeout_timer.getDtFromHardMark() > timeout)
+            {
+                break;
+            }
 
             pros::delay(10);
         }
@@ -1291,7 +1349,7 @@ namespace pid
         double bias = 0;
         double minPow = -600;
 
-        QTime time = 0.4_s;
+        QTime time = 0.5_s;
 
         double derivative;
         double prevError = 0;
@@ -1394,13 +1452,13 @@ namespace pid
     void turnPID(double deg)
     {
 
-        turnPID(deg, 2.0, 3.0);
+        turnPID(deg, 2.3, 3.0);
     }
 
     void distancePID(int setPoint, bool direction)
     {
         double kP = 50.0;
-        double kP_angular = 4.0;
+        double kP_angular = 40.0;
 
         int initHeading = inertial.get();
 
